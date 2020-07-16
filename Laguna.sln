@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bazaar", "Bazaar\Bazaar.csproj", "{65CD5BFD-27D5-4C82-A6C0-19587C66D897}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bazaar.Example.ConsoleApp", "Bazaar.Example.ConsoleApp\Bazaar.Example.ConsoleApp.csproj", "{35F97A00-B990-4205-9A58-7AE0A03B206D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{65CD5BFD-27D5-4C82-A6C0-19587C66D897}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65CD5BFD-27D5-4C82-A6C0-19587C66D897}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65CD5BFD-27D5-4C82-A6C0-19587C66D897}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65CD5BFD-27D5-4C82-A6C0-19587C66D897}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35F97A00-B990-4205-9A58-7AE0A03B206D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35F97A00-B990-4205-9A58-7AE0A03B206D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35F97A00-B990-4205-9A58-7AE0A03B206D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35F97A00-B990-4205-9A58-7AE0A03B206D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {74C1966A-5C47-410D-817B-0A9CDE515D26}
+	EndGlobalSection
+EndGlobal
