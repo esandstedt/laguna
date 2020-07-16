@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Bazaar.Example.ConsoleApp.Agents
 {
-    public class Blacksmith : Agent
+    public class Blacksmith : BaseAgent
     {
-        public Blacksmith() : base("blacksmith")
+        public Blacksmith(Market market) : base(market, "blacksmith")
         {
             this.Buys("food", 2);
             this.Buys("metal", 8);
@@ -18,21 +19,27 @@ namespace Bazaar.Example.ConsoleApp.Agents
 
         protected override void PerformProduction()
         {
-            var hasTooManyTools = 8 < this.Inventory.Get("tools");
-            var hasFood = 0 < this.Inventory.Get("food");
-
-            var amount = Math.Min(this.Inventory.Get("metal"), 4);
-
-            if (!hasTooManyTools && hasFood)
+            if (this.Tools < 8)
             {
-                this.Consume("metal", amount);
-                this.Produce("tools", amount);
-                this.Consume("food", 1);
+                var hasFood = 0 < this.Food;
+
+                if (hasFood)
+                {
+                    var amount = Math.Min(this.Inventory.Get("metal"), 4);
+                    this.Consume("metal", amount);
+                    this.Produce("tools", 0.5 * amount);
+                }
+                else
+                {
+                    var amount = Math.Min(this.Inventory.Get("metal"), 2);
+                    this.Consume("metal", amount);
+                    this.Produce("tools", 0.25 * amount);
+                }
             }
-            else
-            {
-                this.Consume("money", 2);
-            }
+
+            this.Eat();
+
+            this.RestrictPriceBelief("tools");
         }
     }
 }

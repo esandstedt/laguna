@@ -29,7 +29,7 @@ namespace Bazaar
         {
             if (!this.priceBeliefs.ContainsKey(commodity))
             {
-                this.priceBeliefs[commodity] = (1, 2);
+                this.priceBeliefs[commodity] = (1, 1);
             }
         }
     }

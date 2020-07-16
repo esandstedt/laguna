@@ -19,15 +19,39 @@ namespace Bazaar
         private List<(string, double)> buys = new List<(string, double)>();
         private List<string> sells = new List<string>();
 
-        private PriceBeliefs priceBeliefs = new PriceBeliefs();
+        public PriceBeliefs PriceBeliefs = new PriceBeliefs();
 
         private Dictionary<string, double> consumes = new Dictionary<string, double>();
         private Dictionary<string, double> produces = new Dictionary<string, double>();
 
-        public Agent(string type)
+        public Agent(Market market, string type)
         {
-            Type = type;
+            this.Type = type;
+            this.InitializePriceBeliefs(market);
         }
+
+        private void InitializePriceBeliefs(Market market)
+        {
+            foreach (var commodity in market.History.Keys)
+            {
+                IList<MarketHistory> history = market.History.GetValueOrDefault(commodity);
+                if (history != null)
+                {
+                    var list = history.Reverse()
+                        .Take(10)
+                        .Where(x => x.AmountTraded != 0)
+                        .ToList();
+
+                    if (list.Any())
+                    {
+                        var avgPrice = list.Sum(x => x.AveragePrice) / list.Count;
+                        this.PriceBeliefs.Set(commodity, 0.8 * avgPrice, 1.2 * avgPrice);
+                    }
+                }
+            }
+        }
+
+        private List<(double, double)> unitCosts = new List<(double, double)>();
 
         public virtual void Step()
         {
@@ -42,7 +66,7 @@ namespace Bazaar
                 var (minTotalCost, maxTotalCost) = this.consumes
                     .Select(pair =>
                     {
-                        var (minPrice, maxPrice) = this.priceBeliefs.Get(pair.Key);
+                        var (minPrice, maxPrice) = this.PriceBeliefs.Get(pair.Key);
                         return (
                             pair.Value * minPrice,
                             pair.Value * maxPrice
@@ -50,20 +74,28 @@ namespace Bazaar
                     })
                     .Aggregate((acc, x) => (acc.Item1 + x.Item1, acc.Item2 + x.Item2));
 
-
                 var minUnitCost = minTotalCost / totalCount;
                 var maxUnitCost = maxTotalCost / totalCount;
 
+                this.unitCosts.Add((minUnitCost, maxUnitCost));
+                if (20 < this.unitCosts.Count)
+                {
+                    this.unitCosts.RemoveAt(0);
+                }
+
+                var avgMinUnitCost = this.unitCosts.Average(x => x.Item1);
+                var avgMaxUnitCost = this.unitCosts.Average(x => x.Item2);
+
                 foreach (var commodity in this.produces.Keys)
                 {
-                    var (minPrice, maxPrice) = this.priceBeliefs.Get(commodity);
-                    var newMinPrice = minPrice < minUnitCost ? 0.95 * minPrice + 0.05 * minUnitCost : minPrice;
-                    var newMaxPrice = maxPrice < maxUnitCost ? 0.95 * maxPrice + 0.05 * maxUnitCost : maxPrice;
-                    this.priceBeliefs.Set(commodity, newMinPrice, newMaxPrice);
+                    var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
+                    var newMinPrice = minPrice < avgMinUnitCost ? 0.25 * minPrice + 0.75 * avgMinUnitCost : minPrice;
+                    var newMaxPrice = maxPrice < avgMaxUnitCost ? 0.25 * maxPrice + 0.75 * avgMaxUnitCost : maxPrice;
+                    this.PriceBeliefs.Set(commodity, newMinPrice, newMaxPrice);
                     /*
                     if (minPrice < unitCost)
                     {
-                        this.priceBeliefs.Set(
+                        this.PriceBeliefs.Set(
                             commodity,
                             0.5 * minPrice + 0.5 * unitCost,
                             unitCost < maxPrice ? maxPrice : 0.25 * maxPrice + 0.75 * unitCost
@@ -107,7 +139,7 @@ namespace Bazaar
 
         private Offer CreateBuyOffer(string commodity, double amount, double money)
         {
-            var (minPrice, maxPrice) = this.priceBeliefs.Get(commodity);
+            var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
             var price = minPrice + this.random.NextDouble() * (maxPrice - minPrice);
 
             amount = Math.Min(amount, Math.Floor(money / price));
@@ -124,7 +156,7 @@ namespace Bazaar
 
         private Offer CreateSellOffer(string commodity, double amount)
         {
-            var (minPrice, maxPrice) = this.priceBeliefs.Get(commodity);
+            var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
             var price = minPrice + this.random.NextDouble() * (maxPrice - minPrice);
 
             return new Offer
@@ -140,14 +172,14 @@ namespace Bazaar
 
         public void UpdatePriceModel(OfferType type, string commodity, bool success, double price = 0)
         {
-            var (minPrice, maxPrice) = this.priceBeliefs.Get(commodity);
+            var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
             var money = this.Inventory.Get("money");
 
             if (success)
             {
                 if (price < minPrice)
                 {
-                    this.priceBeliefs.Set(
+                    this.PriceBeliefs.Set(
                         commodity,
                         0.90 * minPrice + 0.10 * price,
                         0.95 * maxPrice + 0.05 * price
@@ -155,7 +187,7 @@ namespace Bazaar
                 }
                 else if (maxPrice < price)
                 {
-                    this.priceBeliefs.Set(
+                    this.PriceBeliefs.Set(
                         commodity,
                         0.95 * minPrice + 0.05 * price,
                         0.90 * maxPrice + 0.10 * price
@@ -163,7 +195,7 @@ namespace Bazaar
                 }
                 else
                 {
-                    this.priceBeliefs.Set(
+                    this.PriceBeliefs.Set(
                         commodity,
                         0.95 * minPrice + 0.05 * price,
                         0.95 * maxPrice + 0.05 * price
@@ -174,7 +206,7 @@ namespace Bazaar
             {
                 if (type == OfferType.Buy)
                 {
-                    this.priceBeliefs.Set(
+                    this.PriceBeliefs.Set(
                         commodity,
                         minPrice,
                         Math.Min(1.05 * maxPrice, money)
@@ -182,7 +214,7 @@ namespace Bazaar
                 }
                 else if (type == OfferType.Sell)
                 {
-                    this.priceBeliefs.Set(
+                    this.PriceBeliefs.Set(
                         commodity,
                         0.95 * minPrice,
                         maxPrice

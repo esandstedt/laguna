@@ -17,23 +17,21 @@ namespace Bazaar.Example.ConsoleApp
         {
             var market = new Market();
 
-            var agentCount = 1000;
+            var agentCount = 50;
             var maxMoney = agentCount * 50;
 
             for (var i=0; i<agentCount; i++)
             {
-                market.Agents.Add(CreateRandomAgent());
+                market.Agents.Add(CreateRandomAgent(market));
             }
 
-            for (var i = 0; i < 5000; i++)
+            for (var i = 0; i < 500; i++)
             {
                 market.Step();
 
                 var bankruptAgents = market.Agents
                     .Where(x => x.Inventory.Get("money") < 0)
                     .ToList();
-
-                Console.WriteLine("{0,5}: {1}", i, bankruptAgents.Count);
 
                 foreach (var agent in bankruptAgents)
                 {
@@ -73,19 +71,19 @@ namespace Bazaar.Example.ConsoleApp
                     switch (commodity)
                     {
                         case "food":
-                            market.Agents.Add(new Farmer());
+                            market.Agents.Add(new Farmer(market));
                             break;
                         case "wood":
-                            market.Agents.Add(new Woodcutter());
+                            market.Agents.Add(new Woodcutter(market));
                             break;
                         case "ore":
-                            market.Agents.Add(new Miner());
+                            market.Agents.Add(new Miner(market));
                             break;
                         case "metal":
-                            market.Agents.Add(new Refiner());
+                            market.Agents.Add(new Refiner(market));
                             break;
                         case "tools":
-                            market.Agents.Add(new Blacksmith());
+                            market.Agents.Add(new Blacksmith(market));
                             break;
                     }
                 }
@@ -102,6 +100,8 @@ namespace Bazaar.Example.ConsoleApp
                         );
                     }
                 }
+
+                Console.WriteLine("{0,5}: {1,3}", i, bankruptAgents.Count);
             }
 
             var agentCounts = market.Agents
@@ -117,19 +117,27 @@ namespace Bazaar.Example.ConsoleApp
                 .Select(x => market.History[x].Last())
                 .ToList();
 
+            var beliefs = market.Agents
+                .Where(x => x.Type == "blacksmith")
+                .Select(x => x.PriceBeliefs.Get("tools"))
+                .ToList();
+
+            var total = beliefs.Aggregate((acc, x) => (acc.Item1 + x.Item1, acc.Item2 + x.Item2));
+            var average = (total.Item1 / beliefs.Count, total.Item2 / beliefs.Count);
+
             { }
 
         }
 
-        private static Agent CreateRandomAgent()
+        private static Agent CreateRandomAgent(Market market)
         {
             switch (Random.Next(5))
             {
-                case 0: return new Farmer();
-                case 1: return new Woodcutter();
-                case 2: return new Miner();
-                case 3: return new Refiner();
-                case 4: return new Blacksmith();
+                case 0: return new Farmer(market);
+                case 1: return new Woodcutter(market);
+                case 2: return new Miner(market);
+                case 3: return new Refiner(market);
+                case 4: return new Blacksmith(market);
                 default: throw new InvalidOperationException();
             }
         }

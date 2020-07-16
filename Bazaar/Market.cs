@@ -93,17 +93,18 @@ namespace Bazaar
                         succesfulTrades += 1;
                         moneyTraded += money;
                         amountTraded += amount;
+
+                        buyer.Agent.UpdatePriceModel(OfferType.Buy, commodity, true, price);
+                        seller.Agent.UpdatePriceModel(OfferType.Sell, commodity, true, price);
                     }
 
                     if (buyer.Amount == 0)
                     {
-                        buyer.Agent.UpdatePriceModel(OfferType.Buy, commodity, true, price);
                         buyers.Pop();
                     }
 
                     if (seller.Amount == 0)
                     {
-                        seller.Agent.UpdatePriceModel(OfferType.Sell, commodity, true, price);
                         sellers.Pop();
                     }
                 }
