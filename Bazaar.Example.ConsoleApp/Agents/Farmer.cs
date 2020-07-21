@@ -1,56 +1,69 @@
-﻿using System;
+﻿using Bazaar.Example.ConsoleApp.Behaviors;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Bazaar.Example.ConsoleApp.Agents
 {
-    public class Farmer : BaseAgent
+    public class Farmer : Agent
     {
         public Farmer(Market market) : base(market, "farmer")
         {
-            this.Buys("wood", 2);
-            this.Buys("tools", 2);
-            this.Sells("food");
+            this.Behaviors.Add(new EatBehavior(this));
+            this.Behaviors.Add(new FarmerBehavior(this));
 
-            this.Inventory.Add("wood", 2);
-            this.Inventory.Add("money", 30);
+            this.Inventory.Add(Constants.Wood, 2);
+            this.Inventory.Add(Constants.Money, 30);
         }
+    }
 
-        protected override void PerformProduction()
+    public class FarmerBehavior : AgentBehavior
+    {
+
+        public FarmerBehavior(Agent agent) : base(agent) { }
+
+        public override void Perform()
         {
-            if (this.Food < 8)
+            var wheat = this.Agent.Inventory.Get(Constants.Wheat);
+            var tools = this.Agent.Inventory.Get(Constants.Tools);
+            var wood = this.Agent.Inventory.Get(Constants.Wood);
+
+            if (wheat < 4)
             {
-                var hasTools = 0 < this.Tools;
-                var hasWood = 0 < this.Wood;
+                var hasTools = 0 < tools;
+                var hasWood = 0 < wood;
 
                 if (hasTools && hasWood)
                 {
-                    this.Produce("food", 4);
-                    this.Consume("wood", 1);
+                    this.Agent.Produce(Constants.Wheat, 0.5);
+                    this.Agent.Consume(Constants.Wood, 0.25);
 
-                    if (this.Random.NextDouble() < 0.25)
+                    if (this.Random.NextDouble() < 0.1)
                     {
-                        this.Consume("tools", 1);
+                        this.Agent.Consume(Constants.Tools, 1);
                     }
                 }
                 else if (hasWood)
                 {
-                    this.Produce("food", 3);
-                    this.Consume("wood", 1);
+                    this.Agent.Produce(Constants.Wheat, 0.25);
+                    this.Agent.Consume(Constants.Wood, 0.5);
                 }
                 else
                 {
-                    this.Produce("food", 2);
+                    this.Agent.Consume(Constants.Money, 1);
                 }
             }
             else
             {
-                this.Consume("money", 2);
+                this.Agent.Consume(Constants.Money, 1);
             }
+        }
 
-            this.Eat();
-
-            this.RestrictPriceBelief("food");
+        public override IEnumerable<Offer> GenerateOffers()
+        {
+            yield return this.Buy(Constants.Wood, 2);
+            yield return this.Buy(Constants.Tools, 2);
+            yield return this.Sell(Constants.Wheat);
         }
     }
 }

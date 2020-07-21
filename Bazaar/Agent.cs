@@ -12,15 +12,13 @@ namespace Bazaar
     {
 
         public string Type { get; }
+        public List<AgentBehavior> Behaviors = new List<AgentBehavior>();
         public Inventory Inventory { get; set; } = new Inventory();
-
-        private Random random = new Random();
-
-        private List<(string, double)> buys = new List<(string, double)>();
-        private List<string> sells = new List<string>();
-
         public PriceBeliefs PriceBeliefs = new PriceBeliefs();
 
+        private Random random = new Random();
+        private List<(string, double)> buys = new List<(string, double)>();
+        private List<string> sells = new List<string>();
         private Dictionary<string, double> consumes = new Dictionary<string, double>();
         private Dictionary<string, double> produces = new Dictionary<string, double>();
 
@@ -39,13 +37,26 @@ namespace Bazaar
                 {
                     var list = history.Reverse()
                         .Take(10)
-                        .Where(x => x.AmountTraded != 0)
                         .ToList();
 
-                    if (list.Any())
+                    var listWhereTraded = list.Where(x => 0 < x.AmountTraded).ToList();
+                    if (listWhereTraded.Any())
                     {
-                        var avgPrice = list.Sum(x => x.AveragePrice) / list.Count;
-                        this.PriceBeliefs.Set(commodity, 0.8 * avgPrice, 1.2 * avgPrice);
+                        var avgPrice = listWhereTraded.Average(x => x.AveragePrice);
+                        this.PriceBeliefs.Set(
+                            commodity,
+                            0.8 * avgPrice, 
+                            1.2 * avgPrice
+                        );
+                    }
+                    else
+                    {
+                        var avgPrice = list.Average(x => x.LowestSellingPrice);
+                        this.PriceBeliefs.Set(
+                            commodity,
+                            0.8 * avgPrice,
+                            1.2 * avgPrice
+                        );
                     }
                 }
             }
@@ -58,7 +69,10 @@ namespace Bazaar
             this.consumes.Clear();
             this.produces.Clear();
 
-            this.PerformProduction();
+            foreach (var behavior in this.Behaviors)
+            {
+                behavior.Perform();
+            }
 
             var totalCount = this.produces.Sum(x => x.Value);
             if (totalCount != 0)
@@ -89,29 +103,48 @@ namespace Bazaar
                 foreach (var commodity in this.produces.Keys)
                 {
                     var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
-                    var newMinPrice = minPrice < avgMinUnitCost ? 0.25 * minPrice + 0.75 * avgMinUnitCost : minPrice;
-                    var newMaxPrice = maxPrice < avgMaxUnitCost ? 0.25 * maxPrice + 0.75 * avgMaxUnitCost : maxPrice;
-                    this.PriceBeliefs.Set(commodity, newMinPrice, newMaxPrice);
-                    /*
-                    if (minPrice < unitCost)
-                    {
-                        this.PriceBeliefs.Set(
-                            commodity,
-                            0.5 * minPrice + 0.5 * unitCost,
-                            unitCost < maxPrice ? maxPrice : 0.25 * maxPrice + 0.75 * unitCost
-                        );
-                    }
-                     */
+
+                    var newMinPrice = 0.75 * minPrice + 0.25 * (1.05 * avgMinUnitCost);
+                    var newMaxPrice = 0.75 * maxPrice + 0.25 * (1.05 * avgMaxUnitCost);
+
+                    this.PriceBeliefs.Set(
+                        commodity,
+                        newMinPrice,
+                        newMaxPrice
+                    );
                 }
             }
 
         }
 
-        protected abstract void PerformProduction();
-
         public IEnumerable<Offer> GenerateOffers()
         {
             var money = this.Inventory.Get("money");
+
+            var offers = this.Behaviors
+                .SelectMany(x => x.GenerateOffers())
+                .ToList();
+
+            var buyOffers = offers
+                .Where(x => x.Type == OfferType.Buy)
+                .SelectMany(x => this.SplitOffer(x, 1));
+
+            foreach (var offer in buyOffers)
+            {
+                money -= offer.Price * offer.Amount;
+
+                if (money < 0)
+                {
+                    break;
+                }
+
+                yield return offer;
+            }
+
+            foreach (var offer in offers.Where(x => x.Type == OfferType.Sell))
+            {
+                yield return offer;
+            }
 
             foreach (var (commodity, desiredAmount) in this.buys)
             {
@@ -134,6 +167,25 @@ namespace Bazaar
                 {
                     yield return this.CreateSellOffer(commodity, amount);
                 }
+            }
+        }
+
+        private IEnumerable<Offer> SplitOffer(Offer offer, double splitAmount)
+        {
+            var amount = offer.Amount;
+            while (splitAmount < amount)
+            {
+                amount -= splitAmount;
+
+                var clone = offer.Clone();
+                clone.Amount = splitAmount;
+                yield return clone;
+            }
+
+            {
+                var clone = offer.Clone();
+                clone.Amount = amount;
+                yield return clone;
             }
         }
 
@@ -175,52 +227,46 @@ namespace Bazaar
             var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
             var money = this.Inventory.Get("money");
 
+            var newMinPrice = minPrice;
+            var newMaxPrice = maxPrice;
+
             if (success)
             {
                 if (price < minPrice)
                 {
-                    this.PriceBeliefs.Set(
-                        commodity,
-                        0.90 * minPrice + 0.10 * price,
-                        0.95 * maxPrice + 0.05 * price
-                    );
+                    newMinPrice = 0.90 * minPrice + 0.10 * price;
+                    newMaxPrice = 0.95 * maxPrice + 0.05 * price;
                 }
                 else if (maxPrice < price)
                 {
-                    this.PriceBeliefs.Set(
-                        commodity,
-                        0.95 * minPrice + 0.05 * price,
-                        0.90 * maxPrice + 0.10 * price
-                    );
+                    newMinPrice = 0.95 * minPrice + 0.05 * price;
+                    newMaxPrice = 0.90 * maxPrice + 0.10 * price;
                 }
                 else
                 {
-                    this.PriceBeliefs.Set(
-                        commodity,
-                        0.95 * minPrice + 0.05 * price,
-                        0.95 * maxPrice + 0.05 * price
-                    );
+                    newMinPrice = 0.95 * minPrice + 0.05 * price;
+                    newMaxPrice = 0.95 * maxPrice + 0.05 * price;
                 }
             }
             else
             {
                 if (type == OfferType.Buy)
                 {
-                    this.PriceBeliefs.Set(
-                        commodity,
-                        minPrice,
-                        Math.Min(1.05 * maxPrice, money)
-                    );
+                    newMinPrice = minPrice;
+                    newMaxPrice = Math.Min(1.05 * maxPrice, money);
                 }
                 else if (type == OfferType.Sell)
                 {
-                    this.PriceBeliefs.Set(
-                        commodity,
-                        0.95 * minPrice,
-                        maxPrice
-                    );
+                    newMinPrice = 0.95 * minPrice;
+                    newMaxPrice = maxPrice;
                 }
             }
+
+            this.PriceBeliefs.Set(
+                commodity,
+                newMinPrice,
+                newMaxPrice
+            );
         }
 
         protected void Buys(string commodity, int amount)
@@ -233,7 +279,7 @@ namespace Bazaar
             this.sells.Add(commodity);
         }
 
-        protected void Consume(string commodity, double amount)
+        public void Consume(string commodity, double amount)
         {
             this.Inventory.Remove(commodity, amount);
 
@@ -245,7 +291,7 @@ namespace Bazaar
             this.consumes[commodity] += amount;
         }
 
-        protected void Produce(string commodity, double amount)
+        public void Produce(string commodity, double amount)
         {
             this.Inventory.Add(commodity, amount);
 

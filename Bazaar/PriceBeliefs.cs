@@ -22,7 +22,10 @@ namespace Bazaar
 
         public void Set(string commodity, double minPrice, double maxPrice)
         {
-            this.priceBeliefs[commodity] = (minPrice, maxPrice);
+            this.priceBeliefs[commodity] = (
+                Math.Max(1, minPrice),
+                Math.Max(1, maxPrice)
+            );
         }
 
         private void EnsurePriceBelief(string commodity)

@@ -12,6 +12,18 @@ namespace Bazaar
         public double Price { get; set; }
         public double Amount { get; set; }
 
+        public Offer Clone()
+        {
+            return new Offer
+            {
+                Agent = this.Agent,
+                Type = this.Type,
+                Commodity = this.Commodity,
+                Price = this.Price,
+                Amount = this.Amount
+            };
+        }
+
         public override string ToString()
         {
             return $"Offer: {Type} {Amount:F1} {Commodity} at {Price:F2}";

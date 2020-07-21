@@ -5,53 +5,48 @@ using System.Text;
 
 namespace Bazaar.Example.ConsoleApp.Agents
 {
-    public class Miner : Agent
+    public class Fisherman : Agent
     {
-        public Miner(Market market) : base(market, "miner")
+        public Fisherman(Market market) : base(market, "fisherman")
         {
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);
-            this.Behaviors.Add(new MinerBehavior(this, eat));
+            this.Behaviors.Add(new FishermanBehavior(this, eat));
 
             this.Inventory.Add(Constants.Bread, 2);
             this.Inventory.Add(Constants.Money, 30);
         }
     }
 
-    public class MinerBehavior : AgentBehavior
+    public class FishermanBehavior : AgentBehavior
     {
-
         private readonly EatBehavior eat;
 
-        public MinerBehavior(Agent agent, EatBehavior eat) : base(agent)
+        public FishermanBehavior(Agent agent, EatBehavior eat) : base(agent)
         {
             this.eat = eat;
         }
 
         public override void Perform()
         {
-            var ore = this.Agent.Inventory.Get(Constants.Ore);
+            var fish = this.Agent.Inventory.Get(Constants.Fish);
 
-            if (ore < 8)
+            if (fish < 16)
             {
                 var hasTools = 0 < this.Agent.Inventory.Get(Constants.Tools);
                 var eaten = this.eat.Eaten;
 
                 if (hasTools && eaten)
                 {
-                    this.Agent.Produce(Constants.Ore, 4);
+                    this.Agent.Produce(Constants.Fish, 8);
                 }
-                else if (hasTools)
+                else if (hasTools || eaten)
                 {
-                    this.Agent.Produce(Constants.Ore, 2);
-                }
-                else if (eaten)
-                {
-                    this.Agent.Produce(Constants.Ore, 1);
+                    this.Agent.Produce(Constants.Fish, 4);
                 }
                 else
                 {
-                    this.Agent.Produce(Constants.Ore, 0.5);
+                    this.Agent.Produce(Constants.Fish, 1);
                 }
 
                 if (hasTools && this.Random.NextDouble() < 0.25)
@@ -68,7 +63,9 @@ namespace Bazaar.Example.ConsoleApp.Agents
         public override IEnumerable<Offer> GenerateOffers()
         {
             yield return this.Buy(Constants.Tools, 2);
-            yield return this.Sell(Constants.Ore);
+            yield return this.Sell(Constants.Fish, 2);
         }
+
+
     }
 }

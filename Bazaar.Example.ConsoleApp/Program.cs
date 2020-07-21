@@ -1,4 +1,5 @@
 ﻿using Bazaar.Example.ConsoleApp.Agents;
+using Bazaar.Example.ConsoleApp.Behaviors;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,20 +18,20 @@ namespace Bazaar.Example.ConsoleApp
         {
             var market = new Market();
 
-            var agentCount = 50;
-            var maxMoney = agentCount * 50;
+            var agentCount = 200;
+            var maxMoney = agentCount * 100;
 
             for (var i=0; i<agentCount; i++)
             {
                 market.Agents.Add(CreateRandomAgent(market));
             }
 
-            for (var i = 0; i < 500; i++)
+            for (var i = 0; i < 1000; i++)
             {
                 market.Step();
 
                 var bankruptAgents = market.Agents
-                    .Where(x => x.Inventory.Get("money") < 0)
+                    .Where(x => x.Inventory.Get(Constants.Money) < 0)
                     .ToList();
 
                 foreach (var agent in bankruptAgents)
@@ -38,6 +39,12 @@ namespace Bazaar.Example.ConsoleApp
                     market.Agents.Remove(agent);
                 }
 
+                for (var j = 0; j < bankruptAgents.Count; j++)
+                {
+                    market.Agents.Add(CreateRandomAgent(market));
+                }
+
+                /*
                 var commodityHistory = market.History.Keys
                     .Select(x => market.History[x].Last())
                     .ToList();
@@ -46,7 +53,8 @@ namespace Bazaar.Example.ConsoleApp
                     .Select(x => new
                     {
                         x.Commodity,
-                        Demand = Math.Max(1, x.AmountToBuy - x.AmountToSell)
+                        //Demand = Math.Max(1, x.AmountToBuy - x.AmountToSell)
+                        Demand = ((x.AmountToBuy + 1) / (x.AmountToSell + 1))
                     })
                     .OrderByDescending(a => a.Demand)
                     .ToList();
@@ -70,74 +78,95 @@ namespace Bazaar.Example.ConsoleApp
 
                     switch (commodity)
                     {
-                        case "food":
+                        case Constants.Wheat:
                             market.Agents.Add(new Farmer(market));
                             break;
-                        case "wood":
+                        case Constants.Bread:
+                            market.Agents.Add(new Baker(market));
+                            break;
+                        case Constants.Wood:
                             market.Agents.Add(new Woodcutter(market));
                             break;
-                        case "ore":
+                        case Constants.Ore:
                             market.Agents.Add(new Miner(market));
                             break;
-                        case "metal":
+                        case Constants.Metal:
                             market.Agents.Add(new Refiner(market));
                             break;
-                        case "tools":
+                        case Constants.Tools:
                             market.Agents.Add(new Blacksmith(market));
                             break;
                     }
                 }
+                 */
 
-                var totalMoney = market.Agents.Sum(x => x.Inventory.Get("money"));
+                var totalMoney = market.Agents.Sum(x => x.Inventory.Get(Constants.Money));
                 if (maxMoney < totalMoney)
                 {
                     var percent = maxMoney / totalMoney;
                     foreach (var agent in market.Agents)
                     {
                         agent.Inventory.Set(
-                            "money",
-                            percent * agent.Inventory.Get("money")
+                            Constants.Money,
+                            percent * agent.Inventory.Get(Constants.Money)
                         );
                     }
                 }
 
-                Console.WriteLine("{0,5}: {1,3}", i, bankruptAgents.Count);
+                var wheat = market.History[Constants.Wheat].Last();
+                var bread = market.History[Constants.Bread].Last();
+                var fish = market.History[Constants.Fish].Last();
+                var wood = market.History[Constants.Wood].Last();
+                var tools = market.History[Constants.Tools].Last();
+
+                Console.WriteLine(
+                    "{0,5}: {1,3} | {2,4} {3,6:F2} | {4,4} {5,6:F2} | {6,4} {7,6:F2} | {8,4} {9,6:F2} | {10,4} {11,6:F2}", 
+                    i,
+                    bankruptAgents.Count,
+                    (int)wheat.AmountToSell,
+                    wheat.AveragePrice,
+                    (int)bread.AmountToSell,
+                    bread.AveragePrice,
+                    (int)fish.AmountToSell,
+                    fish.AveragePrice,
+                    (int)wood.AmountToSell,
+                    wood.AveragePrice,
+                    (int)tools.AmountToSell,
+                    tools.AveragePrice
+                );
             }
 
-            var agentCounts = market.Agents
-                .GroupBy(x => x.Type)
-                .Select(x => new
-                {
-                    Type = x.Key,
-                    Count = x.Count()
-                })
-                .ToList();
+            {
+                var agentCounts = market.Agents
+                    .GroupBy(x => x.Type)
+                    .Select(x => new
+                    {
+                        Type = x.Key,
+                        Count = x.Count()
+                    })
+                    .ToList();
 
-            var history = market.History.Keys
-                .Select(x => market.History[x].Last())
-                .ToList();
+                var history = market.History.Keys
+                    .Select(x => market.History[x].Last())
+                    .ToList();
 
-            var beliefs = market.Agents
-                .Where(x => x.Type == "blacksmith")
-                .Select(x => x.PriceBeliefs.Get("tools"))
-                .ToList();
+                { }
 
-            var total = beliefs.Aggregate((acc, x) => (acc.Item1 + x.Item1, acc.Item2 + x.Item2));
-            var average = (total.Item1 / beliefs.Count, total.Item2 / beliefs.Count);
-
-            { }
+            }
 
         }
 
         private static Agent CreateRandomAgent(Market market)
         {
-            switch (Random.Next(5))
+            switch (Random.Next(7))
             {
                 case 0: return new Farmer(market);
-                case 1: return new Woodcutter(market);
-                case 2: return new Miner(market);
-                case 3: return new Refiner(market);
-                case 4: return new Blacksmith(market);
+                case 1: return new Baker(market);
+                case 2: return new Fisherman(market);
+                case 3: return new Woodcutter(market);
+                case 4: return new Miner(market);
+                case 5: return new Refiner(market);
+                case 6: return new Blacksmith(market);
                 default: throw new InvalidOperationException();
             }
         }

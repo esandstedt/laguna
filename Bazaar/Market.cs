@@ -34,11 +34,7 @@ namespace Bazaar
 
         private void ResolveOffers(List<Offer> offers)
         {
-            var groups = offers
-                .Where(x => 1 < x.Amount)
-                .GroupBy(x => x.Commodity);
-
-            foreach (var group in groups)
+            foreach (var group in offers.GroupBy(x => x.Commodity))
             {
                 var commodity = group.Key;
 
@@ -63,6 +59,7 @@ namespace Bazaar
                 double amountTraded = 0;
                 double amountToBuy = buyers.Sum(x => x.Amount);
                 double amountToSell = sellers.Sum(x => x.Amount);
+                double lowestSellingPrice = sellers.Any() ? sellers.Min(x => x.Price) : 1;
 
                 while (buyers.Count != 0 && sellers.Count != 0)
                 {
@@ -76,7 +73,7 @@ namespace Bazaar
 
                     var amount = Math.Min(buyer.Amount, seller.Amount);
                     var price = seller.Price + this.random.NextDouble() * (buyer.Price - seller.Price);
-                    //var price = (buyer.Price + seller.Price) / 2;
+
 
                     if (0 < amount)
                     {
@@ -131,6 +128,7 @@ namespace Bazaar
                     AmountTraded = amountTraded,
                     MoneyTraded = moneyTraded,
                     AveragePrice = avgPrice,
+                    LowestSellingPrice = lowestSellingPrice
                 });
             }
         } 
@@ -147,6 +145,7 @@ namespace Bazaar
 
     public class MarketHistory
     {
+
         public string Commodity { get; set; }
         public int SuccessfulTrades { get; set; }
         public double MoneyTraded { get; set; }
@@ -154,5 +153,7 @@ namespace Bazaar
         public double AmountToBuy { get; set; }
         public double AmountToSell { get; set; }
         public double AveragePrice { get; set; }
+
+        public double LowestSellingPrice { get; set; }
     }
 }

@@ -1,45 +1,68 @@
-﻿using System;
+﻿using Bazaar.Example.ConsoleApp.Behaviors;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 
 namespace Bazaar.Example.ConsoleApp.Agents
 {
-    public class Blacksmith : BaseAgent
+    public class Blacksmith : Agent
     {
         public Blacksmith(Market market) : base(market, "blacksmith")
         {
-            this.Buys("food", 2);
-            this.Buys("metal", 8);
-            this.Sells("tools");
+            var eat = new EatBehavior(this);
+            this.Behaviors.Add(eat);
+            this.Behaviors.Add(new BlacksmithBehavior(this, eat));
 
-            this.Inventory.Add("food", 2);
-            this.Inventory.Add("money", 50);
+            this.Inventory.Add(Constants.Bread, 2);
+            this.Inventory.Add(Constants.Money, 100);
+        }
+    }
+
+    public class BlacksmithBehavior : AgentBehavior
+    {
+        private readonly EatBehavior eat;
+
+        public BlacksmithBehavior(Agent agent, EatBehavior eat) : base(agent)
+        {
+            this.eat = eat;
         }
 
-        protected override void PerformProduction()
+        public override void Perform()
         {
-            if (this.Tools < 8)
-            {
-                var hasFood = 0 < this.Food;
+            var metal = this.Agent.Inventory.Get(Constants.Metal);
+            var tools = this.Agent.Inventory.Get(Constants.Tools);
+            var wood = this.Agent.Inventory.Get(Constants.Wood);
 
-                if (hasFood)
+            if (tools < 4)
+            {
+                var hasTools = 0 < tools;
+                var eaten = this.eat.Eaten;
+
+                var amount = new List<double> { metal, wood, eaten ? 2 : 1 }.Min();
+                var factor = hasTools ? 2 : 1;
+
+                this.Agent.Consume(Constants.Metal, amount);
+                this.Agent.Consume(Constants.Wood, amount);
+                this.Agent.Produce(Constants.Tools, factor * amount);
+
+                if (hasTools && this.Random.NextDouble() < 0.25)
                 {
-                    var amount = Math.Min(this.Inventory.Get("metal"), 4);
-                    this.Consume("metal", amount);
-                    this.Produce("tools", 0.5 * amount);
-                }
-                else
-                {
-                    var amount = Math.Min(this.Inventory.Get("metal"), 2);
-                    this.Consume("metal", amount);
-                    this.Produce("tools", 0.25 * amount);
+                    this.Agent.Consume(Constants.Tools, 1);
                 }
             }
+            else
+            {
+                this.Agent.Consume(Constants.Money, 1);
+            }
+        }
 
-            this.Eat();
-
-            this.RestrictPriceBelief("tools");
+        public override IEnumerable<Offer> GenerateOffers()
+        {
+            yield return this.Buy(Constants.Metal, 4);
+            yield return this.Buy(Constants.Wood, 4);
+            yield return this.Sell(Constants.Tools, 2);
         }
     }
 }
