@@ -41,6 +41,7 @@ namespace Bazaar
                 var buyers = new Stack<Offer>(
                     group
                         .Where(x => x.Type == OfferType.Buy)
+                        .Where(x => 0 < x.Amount)
                         .OrderBy(x => x.Price)
                         .ToList()
                 );
@@ -48,6 +49,7 @@ namespace Bazaar
                 var sellers = new Stack<Offer>(
                     group
                         .Where(x => x.Type == OfferType.Sell)
+                        .Where(x => 0 < x.Amount)
                         .OrderByDescending(x => x.Price)
                         .ToList()
                 );
@@ -73,7 +75,6 @@ namespace Bazaar
 
                     var amount = Math.Min(buyer.Amount, seller.Amount);
                     var price = seller.Price + this.random.NextDouble() * (buyer.Price - seller.Price);
-
 
                     if (0 < amount)
                     {

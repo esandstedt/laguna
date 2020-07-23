@@ -232,21 +232,8 @@ namespace Bazaar
 
             if (success)
             {
-                if (price < minPrice)
-                {
-                    newMinPrice = 0.90 * minPrice + 0.10 * price;
-                    newMaxPrice = 0.95 * maxPrice + 0.05 * price;
-                }
-                else if (maxPrice < price)
-                {
-                    newMinPrice = 0.95 * minPrice + 0.05 * price;
-                    newMaxPrice = 0.90 * maxPrice + 0.10 * price;
-                }
-                else
-                {
-                    newMinPrice = 0.95 * minPrice + 0.05 * price;
-                    newMaxPrice = 0.95 * maxPrice + 0.05 * price;
-                }
+                newMinPrice = 0.5 * minPrice + 0.5 * price;
+                newMaxPrice = 0.5 * maxPrice + 0.5 * price;
             }
             else
             {
