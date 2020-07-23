@@ -14,6 +14,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
         private static readonly double NUTRITION_DAILY = 1.25;
         private static readonly double NUTRITION_EATEN = 1.0;
+        private static readonly double FAVORABILITY_THRESHOLD = 0.1;
 
         private readonly Dictionary<string, double> foodNutrition;
 
@@ -25,6 +26,8 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
             {
                 { Constants.Bread, 1.5 },
                 { Constants.Fish, 0.5 },
+                { Constants.Wheat, 0.05 },
+                { Constants.Wood, 0.01 },
             };
         }
 
@@ -84,7 +87,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
         private void UpdateFavorability()
         {
-            var list = this.foodNutrition
+            var initialList = this.foodNutrition
                 .Select(pair =>
                 {
                     var (commodity, nutrition) = (pair.Key, pair.Value);
@@ -98,8 +101,14 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
                 })
                 .ToList();
 
-            var totalValue = list.Sum(x => x.Value);
+            var initialTotalValue = initialList.Sum(x => x.Value);
+            var initialFavorability = initialList.ToDictionary(x => x.Commodity, x => x.Value / initialTotalValue);
 
+            var list = initialList
+                .Where(x => FAVORABILITY_THRESHOLD < initialFavorability[x.Commodity])
+                .ToList();
+
+            var totalValue = list.Sum(x => x.Value);
             this.favorability = list.ToDictionary(x => x.Commodity, x => x.Value / totalValue);
         }
 
