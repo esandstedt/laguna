@@ -7,17 +7,15 @@ namespace Bazaar.Example.ConsoleApp.Agents
 {
     public class Fisherman : Agent
     {
-        public Fisherman(Market market) : base(market, "fisherman")
+        public Fisherman(Market market, Area area) : base(market, "fisherman")
         {
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);
             this.Behaviors.Add(new ProduceBehavior(
                 this,
                 eat,
-                new ProduceBehaviorOptions
+                new AreaProduceBehaviorOptions(area, Constants.Fish)
                 {
-                    Commodity = Constants.Fish,
-                    BaseAmount = 2,
                     EatFactor = 2,
                     ToolsFactor = 2,
                     ToolsBreakChance = 0.1

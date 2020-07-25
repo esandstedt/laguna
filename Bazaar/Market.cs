@@ -62,6 +62,9 @@ namespace Bazaar
                 double amountToBuy = buyers.Sum(x => x.Amount);
                 double amountToSell = sellers.Sum(x => x.Amount);
                 double lowestSellingPrice = sellers.Any() ? sellers.Min(x => x.Price) : 1;
+                double highestSellingPrice = sellers.Any() ? sellers.Max(x => x.Price) : 1;
+                double lowestBuyingPrice = buyers.Any() ? buyers.Min(x => x.Price) : 1;
+                double highestBuyingPrice = buyers.Any() ? buyers.Max(x => x.Price) : 1;
 
                 while (buyers.Count != 0 && sellers.Count != 0)
                 {
@@ -119,8 +122,7 @@ namespace Bazaar
 
                 var avgPrice = moneyTraded / amountTraded;
 
-                this.EnsureMarketHistory(commodity);
-                this.History[commodity].Add(new MarketHistory
+                this.AddMarketHistory(commodity, new MarketHistory
                 {
                     Commodity = commodity,
                     SuccessfulTrades = succesfulTrades,
@@ -129,19 +131,33 @@ namespace Bazaar
                     AmountTraded = amountTraded,
                     MoneyTraded = moneyTraded,
                     AveragePrice = avgPrice,
-                    LowestSellingPrice = lowestSellingPrice
+                    LowestSellingPrice = lowestSellingPrice,
+                    HighestSellingPrice = highestSellingPrice,
+                    LowestBuyingPrice = lowestBuyingPrice,
+                    HighestBuyingPrice = highestBuyingPrice,
                 });
+
+                { }
             }
         } 
-        
-        private void EnsureMarketHistory(string commodity)
+
+        private void AddMarketHistory(string commodity, MarketHistory history)
         {
             if (!this.History.ContainsKey(commodity))
             {
                 this.History[commodity] = new List<MarketHistory>();
             }
-        }
 
+
+            var list = this.History[commodity];
+
+            list.Insert(0, history);
+
+            if (20 < list.Count)
+            {
+                list.RemoveAt(list.Count - 1);
+            }
+        }
     }
 
     public class MarketHistory
@@ -154,7 +170,9 @@ namespace Bazaar
         public double AmountToBuy { get; set; }
         public double AmountToSell { get; set; }
         public double AveragePrice { get; set; }
-
         public double LowestSellingPrice { get; set; }
+        public double HighestSellingPrice { get; set; }
+        public double LowestBuyingPrice { get; set; }
+        public double HighestBuyingPrice { get; set; }
     }
 }

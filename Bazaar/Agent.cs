@@ -24,6 +24,7 @@ namespace Bazaar
         private List<string> sells = new List<string>();
         private Dictionary<string, double> consumes = new Dictionary<string, double>();
         private Dictionary<string, double> produces = new Dictionary<string, double>();
+        private List<(double, double)> unitCosts = new List<(double, double)>();
 
         public Agent(Market market, string type)
         {
@@ -38,9 +39,7 @@ namespace Bazaar
                 IList<MarketHistory> history = market.History.GetValueOrDefault(commodity);
                 if (history != null)
                 {
-                    var list = history.Reverse()
-                        .Take(10)
-                        .ToList();
+                    var list = history.Take(10).ToList();
 
                     var listWhereTraded = list.Where(x => 0 < x.AmountTraded).ToList();
                     if (listWhereTraded.Any())
@@ -64,8 +63,6 @@ namespace Bazaar
                 }
             }
         }
-
-        private List<(double, double)> unitCosts = new List<(double, double)>();
 
         public virtual void Step()
         {
@@ -94,10 +91,10 @@ namespace Bazaar
                 var minUnitCost = minTotalCost / totalCount;
                 var maxUnitCost = maxTotalCost / totalCount;
 
-                this.unitCosts.Add((minUnitCost, maxUnitCost));
+                this.unitCosts.Insert(0, (minUnitCost, maxUnitCost));
                 if (20 < this.unitCosts.Count)
                 {
-                    this.unitCosts.RemoveAt(0);
+                    this.unitCosts.RemoveAt(this.unitCosts.Count - 1);
                 }
 
                 var avgMinUnitCost = this.unitCosts.Average(x => x.Item1);

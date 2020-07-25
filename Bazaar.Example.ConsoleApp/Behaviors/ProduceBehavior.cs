@@ -5,10 +5,28 @@ using System.Threading;
 
 namespace Bazaar.Example.ConsoleApp.Behaviors
 {
+    public class AreaProduceBehaviorOptions : ProduceBehaviorOptions
+    {
+        private readonly Area area;
+
+        public AreaProduceBehaviorOptions(Area area, string commodity)
+        {
+            this.area = area;
+            this.Commodity = commodity;
+        }
+
+        public override double BaseAmount 
+        {
+            get => this.area.Production[this.Commodity];
+            set => throw new InvalidOperationException();
+        }
+    }
+
+
     public class ProduceBehaviorOptions
     {
         public string Commodity { get; set; }
-        public double BaseAmount { get; set; }
+        public virtual double BaseAmount { get; set; }
         public double EatFactor { get; set; }
         public double ToolsFactor { get; set; }
         public double ToolsBreakChance { get; set; }

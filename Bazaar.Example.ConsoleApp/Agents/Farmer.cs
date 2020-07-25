@@ -7,10 +7,10 @@ namespace Bazaar.Example.ConsoleApp.Agents
 {
     public class Farmer : Agent
     {
-        public Farmer(Market market) : base(market, "farmer")
+        public Farmer(Market market, Area area) : base(market, "farmer")
         {
             this.Behaviors.Add(new EatBehavior(this));
-            this.Behaviors.Add(new FarmerBehavior(this));
+            this.Behaviors.Add(new FarmerBehavior(this, area));
             this.Behaviors.Add(new WorkerBehavior(this));
 
             this.Inventory.Add(Constants.Planks, 2);
@@ -20,8 +20,11 @@ namespace Bazaar.Example.ConsoleApp.Agents
 
     public class FarmerBehavior : AgentBehavior
     {
+        private readonly Area area;
 
-        public FarmerBehavior(Agent agent) : base(agent) { }
+        public FarmerBehavior(Agent agent, Area area) : base(agent) {
+            this.area = area;
+        }
 
         public override void Perform()
         {
@@ -34,9 +37,11 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 var hasTools = 0 < tools;
                 var hasPlanks = 0 < planks;
 
+                var baseAmount = this.area.Production[Constants.Grain];
+
                 if (hasTools && hasPlanks)
                 {
-                    this.Agent.Produce(Constants.Grain, 1.5);
+                    this.Agent.Produce(Constants.Grain, 3 * baseAmount);
                     this.Agent.Consume(Constants.Planks, 0.25);
 
                     if (this.Random.NextDouble() < 0.1)
@@ -46,7 +51,7 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 }
                 else if (hasPlanks)
                 {
-                    this.Agent.Produce(Constants.Grain, 0.5);
+                    this.Agent.Produce(Constants.Grain, baseAmount);
                     this.Agent.Consume(Constants.Planks, 0.5);
                 }
                 else
