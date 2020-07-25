@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Bazaar.Example.ConsoleApp.Agents
 {
-    public class Fisherman : Agent
+    public class Orchardist : Agent
     {
-        public Fisherman(Market market) : base(market, "fisherman")
+        public Orchardist(Market market) : base(market, "orchardist")
         {
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);
@@ -16,16 +16,17 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 eat,
                 new ProduceBehaviorOptions
                 {
-                    Commodity = Constants.Fish,
-                    BaseAmount = 2,
+                    Commodity = Constants.Apples,
+                    BaseAmount = 0.1,
                     EatFactor = 2,
                     ToolsFactor = 2,
                     ToolsBreakChance = 0.1
                 }
-            )); 
+            ));
             this.Behaviors.Add(new WorkerBehavior(this));
 
             this.Inventory.Add(Constants.Money, 100);
+
         }
     }
 }

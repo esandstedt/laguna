@@ -14,8 +14,8 @@ namespace Bazaar.Example.ConsoleApp.Agents
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);
             this.Behaviors.Add(new BlacksmithBehavior(this, eat));
+            this.Behaviors.Add(new WorkerBehavior(this));
 
-            this.Inventory.Add(Constants.Bread, 2);
             this.Inventory.Add(Constants.Money, 100);
         }
     }
@@ -33,21 +33,21 @@ namespace Bazaar.Example.ConsoleApp.Agents
         {
             var metal = this.Agent.Inventory.Get(Constants.Metal);
             var tools = this.Agent.Inventory.Get(Constants.Tools);
-            var wood = this.Agent.Inventory.Get(Constants.Wood);
+            var planks = this.Agent.Inventory.Get(Constants.Planks);
 
             if (tools < 4)
             {
                 var hasTools = 0 < tools;
                 var eaten = this.eat.Eaten;
 
-                var amount = new List<double> { metal, wood, eaten ? 2 : 1 }.Min();
+                var amount = new List<double> { metal, planks, eaten ? 2 : 1 }.Min();
                 var factor = hasTools ? 2 : 1;
 
                 this.Agent.Consume(Constants.Metal, amount);
-                this.Agent.Consume(Constants.Wood, amount);
+                this.Agent.Consume(Constants.Planks, amount);
                 this.Agent.Produce(Constants.Tools, factor * amount);
 
-                if (hasTools && this.Random.NextDouble() < 0.25)
+                if (hasTools && this.Random.NextDouble() < 0.1)
                 {
                     this.Agent.Consume(Constants.Tools, 1);
                 }
@@ -61,7 +61,7 @@ namespace Bazaar.Example.ConsoleApp.Agents
         public override IEnumerable<Offer> GenerateOffers()
         {
             yield return this.Buy(Constants.Metal, 4);
-            yield return this.Buy(Constants.Wood, 4);
+            yield return this.Buy(Constants.Planks, 4);
             yield return this.Sell(Constants.Tools, 2);
         }
     }

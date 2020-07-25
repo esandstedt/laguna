@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Bazaar.Example.ConsoleApp
 {
@@ -18,7 +17,7 @@ namespace Bazaar.Example.ConsoleApp
         {
             var market = new Market();
 
-            var agentCount = 200;
+            var agentCount = 500;
             var maxMoney = agentCount * 100;
 
             for (var i=0; i<agentCount; i++)
@@ -26,7 +25,7 @@ namespace Bazaar.Example.ConsoleApp
                 market.Agents.Add(CreateRandomAgent(market));
             }
 
-            for (var i = 0; i < 1000; i++)
+            for (var i = 0; i < 2000; i++)
             {
                 market.Step();
 
@@ -44,62 +43,6 @@ namespace Bazaar.Example.ConsoleApp
                     market.Agents.Add(CreateRandomAgent(market));
                 }
 
-                /*
-                var commodityHistory = market.History.Keys
-                    .Select(x => market.History[x].Last())
-                    .ToList();
-
-                var commodityDemands = commodityHistory
-                    .Select(x => new
-                    {
-                        x.Commodity,
-                        //Demand = Math.Max(1, x.AmountToBuy - x.AmountToSell)
-                        Demand = ((x.AmountToBuy + 1) / (x.AmountToSell + 1))
-                    })
-                    .OrderByDescending(a => a.Demand)
-                    .ToList();
-
-                var totalDemand = commodityDemands.Sum(x => x.Demand);
-
-                for (var j=0; j<bankruptAgents.Count; j++)
-                {
-
-                    string commodity = commodityDemands.First().Commodity;
-                    var selection = Random.NextDouble() * totalDemand;
-                    foreach (var x in commodityDemands)
-                    {
-                        if (selection < x.Demand)
-                        {
-                            commodity = x.Commodity;
-                            break;
-                        }
-                        selection -= x.Demand;
-                    }
-
-                    switch (commodity)
-                    {
-                        case Constants.Wheat:
-                            market.Agents.Add(new Farmer(market));
-                            break;
-                        case Constants.Bread:
-                            market.Agents.Add(new Baker(market));
-                            break;
-                        case Constants.Wood:
-                            market.Agents.Add(new Woodcutter(market));
-                            break;
-                        case Constants.Ore:
-                            market.Agents.Add(new Miner(market));
-                            break;
-                        case Constants.Metal:
-                            market.Agents.Add(new Refiner(market));
-                            break;
-                        case Constants.Tools:
-                            market.Agents.Add(new Blacksmith(market));
-                            break;
-                    }
-                }
-                 */
-
                 var totalMoney = market.Agents.Sum(x => x.Inventory.Get(Constants.Money));
                 if (maxMoney < totalMoney)
                 {
@@ -113,25 +56,30 @@ namespace Bazaar.Example.ConsoleApp
                     }
                 }
 
-                var wheat = market.History[Constants.Wheat].Last();
+                var grain = market.History[Constants.Grain].Last();
+                var flour = market.History[Constants.Flour].Last();
                 var bread = market.History[Constants.Bread].Last();
                 var fish = market.History[Constants.Fish].Last();
-                var wood = market.History[Constants.Wood].Last();
+                var apples = market.History[Constants.Apples].Last();
+                var logs = market.History[Constants.Logs].Last();
+                var planks = market.History[Constants.Planks].Last();
                 var tools = market.History[Constants.Tools].Last();
 
                 Console.WriteLine(
-                    "{0,5}: {1,3} | {2,4} {3,6:F2} | {4,4} {5,6:F2} | {6,4} {7,6:F2} | {8,4} {9,6:F2} | {10,4} {11,6:F2}", 
+                    "{0,5}: {1,3} | {2,4} {3,6:F2} | {4,4} {5,6:F2} | {6,4} {7,6:F2} | {8,4} {9,6:F2} | {10,4} {11,6:F2} | {12,4} {13,6:F2}", 
                     i,
                     bankruptAgents.Count,
-                    (int)wheat.AmountToSell,
-                    wheat.AveragePrice,
-                    (int)bread.AmountToSell,
+                    (int)grain.AmountTraded,
+                    grain.AveragePrice,
+                    (int)flour.AmountTraded,
+                    flour.AveragePrice,
+                    (int)bread.AmountTraded,
                     bread.AveragePrice,
-                    (int)fish.AmountToSell,
+                    (int)fish.AmountTraded,
                     fish.AveragePrice,
-                    (int)wood.AmountToSell,
-                    wood.AveragePrice,
-                    (int)tools.AmountToSell,
+                    (int)apples.AmountTraded,
+                    apples.AveragePrice,
+                    (int)tools.AmountTraded,
                     tools.AveragePrice
                 );
             }
@@ -158,17 +106,21 @@ namespace Bazaar.Example.ConsoleApp
 
         private static Agent CreateRandomAgent(Market market)
         {
-            switch (Random.Next(7))
+            return new List<Func<Agent>>
             {
-                case 0: return new Farmer(market);
-                case 1: return new Baker(market);
-                case 2: return new Fisherman(market);
-                case 3: return new Woodcutter(market);
-                case 4: return new Miner(market);
-                case 5: return new Refiner(market);
-                case 6: return new Blacksmith(market);
-                default: throw new InvalidOperationException();
+                () => new Farmer(market),
+                () => new Miller(market),
+                () => new Baker(market),
+                () => new Fisherman(market),
+                () => new Orchardist(market),
+                () => new Lumberjack(market),
+                () => new Sawyer(market),
+                () => new Miner(market),
+                () => new Refiner(market),
+                () => new Blacksmith(market),
             }
+                .Random()
+                .Invoke();
         }
     }
 }

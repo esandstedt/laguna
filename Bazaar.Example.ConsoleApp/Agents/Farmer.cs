@@ -11,9 +11,10 @@ namespace Bazaar.Example.ConsoleApp.Agents
         {
             this.Behaviors.Add(new EatBehavior(this));
             this.Behaviors.Add(new FarmerBehavior(this));
+            this.Behaviors.Add(new WorkerBehavior(this));
 
-            this.Inventory.Add(Constants.Wood, 2);
-            this.Inventory.Add(Constants.Money, 30);
+            this.Inventory.Add(Constants.Planks, 2);
+            this.Inventory.Add(Constants.Money, 100);
         }
     }
 
@@ -24,29 +25,29 @@ namespace Bazaar.Example.ConsoleApp.Agents
 
         public override void Perform()
         {
-            var wheat = this.Agent.Inventory.Get(Constants.Wheat);
+            var grain = this.Agent.Inventory.Get(Constants.Grain);
             var tools = this.Agent.Inventory.Get(Constants.Tools);
-            var wood = this.Agent.Inventory.Get(Constants.Wood);
+            var planks = this.Agent.Inventory.Get(Constants.Planks);
 
-            if (wheat < 4)
+            if (grain < 4)
             {
                 var hasTools = 0 < tools;
-                var hasWood = 0 < wood;
+                var hasPlanks = 0 < planks;
 
-                if (hasTools && hasWood)
+                if (hasTools && hasPlanks)
                 {
-                    this.Agent.Produce(Constants.Wheat, 0.5);
-                    this.Agent.Consume(Constants.Wood, 0.25);
+                    this.Agent.Produce(Constants.Grain, 1.5);
+                    this.Agent.Consume(Constants.Planks, 0.25);
 
                     if (this.Random.NextDouble() < 0.1)
                     {
                         this.Agent.Consume(Constants.Tools, 1);
                     }
                 }
-                else if (hasWood)
+                else if (hasPlanks)
                 {
-                    this.Agent.Produce(Constants.Wheat, 0.25);
-                    this.Agent.Consume(Constants.Wood, 0.5);
+                    this.Agent.Produce(Constants.Grain, 0.5);
+                    this.Agent.Consume(Constants.Planks, 0.5);
                 }
                 else
                 {
@@ -61,9 +62,9 @@ namespace Bazaar.Example.ConsoleApp.Agents
 
         public override IEnumerable<Offer> GenerateOffers()
         {
-            yield return this.Buy(Constants.Wood, 2);
+            yield return this.Buy(Constants.Planks, 2);
             yield return this.Buy(Constants.Tools, 2);
-            yield return this.Sell(Constants.Wheat);
+            yield return this.Sell(Constants.Grain);
         }
     }
 }

@@ -9,12 +9,11 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 {
     public class EatBehavior : AgentBehavior
     {
-
-        public bool Eaten { get; private set; }
-
         private static readonly double NUTRITION_DAILY = 1.25;
         private static readonly double NUTRITION_EATEN = 1.0;
         private static readonly double FAVORABILITY_THRESHOLD = 0.1;
+
+        public bool Eaten { get; private set; }
 
         private readonly Dictionary<string, double> foodNutrition;
 
@@ -24,11 +23,12 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
         {
             this.foodNutrition = new Dictionary<string, double>
             {
-                { Constants.Bread, 1.5 },
-                { Constants.Fish, 0.5 },
-                { Constants.Wheat, 0.05 },
-                { Constants.Wood, 0.01 },
+                { Constants.Bread, 1.25 },
+                { Constants.Fish, 0.75 },
+                { Constants.Apples, 0.5 },
             };
+
+            this.Agent.Inventory.Add(Constants.Bread, 2);
         }
 
         public override void Perform()

@@ -12,9 +12,9 @@ namespace Bazaar.Example.ConsoleApp.Agents
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);
             this.Behaviors.Add(new RefinerBehavior(this, eat));
+            this.Behaviors.Add(new WorkerBehavior(this));
 
-            this.Inventory.Add(Constants.Bread, 2);
-            this.Inventory.Add(Constants.Money, 50);
+            this.Inventory.Add(Constants.Money, 100);
         }
     }
 
@@ -45,7 +45,7 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 this.Agent.Consume(Constants.Ore, amount);
                 this.Agent.Produce(Constants.Metal, factor * amount);
 
-                if (hasTools && this.Random.NextDouble() < 0.25)
+                if (hasTools && this.Random.NextDouble() < 0.1)
                 {
                     this.Agent.Consume(Constants.Tools, 1);
                 }

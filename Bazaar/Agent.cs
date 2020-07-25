@@ -11,10 +11,13 @@ namespace Bazaar
     public abstract class Agent
     {
 
+        private static readonly double MINIMUM_PRICE = 1;
+        private static readonly double MAXIMUM_PRICE = 100;
+
         public string Type { get; }
         public List<AgentBehavior> Behaviors = new List<AgentBehavior>();
         public Inventory Inventory { get; set; } = new Inventory();
-        public PriceBeliefs PriceBeliefs = new PriceBeliefs();
+        public PriceBeliefs PriceBeliefs = new PriceBeliefs(MINIMUM_PRICE, MAXIMUM_PRICE);
 
         private Random random = new Random();
         private List<(string, double)> buys = new List<(string, double)>();
@@ -112,6 +115,21 @@ namespace Bazaar
                         newMinPrice,
                         newMaxPrice
                     );
+                }
+
+                if (0 < minUnitCost && minUnitCost < MINIMUM_PRICE)
+                {
+                    foreach (var commodity in this.consumes.Keys)
+                    {
+                        var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
+
+                        this.PriceBeliefs.Set(
+                            commodity,
+                            MINIMUM_PRICE * minPrice / minUnitCost,
+                            MINIMUM_PRICE * maxPrice / minUnitCost
+                        );
+                    }
+
                 }
             }
 
@@ -221,7 +239,6 @@ namespace Bazaar
             };
         }
 
-
         public void UpdatePriceModel(OfferType type, string commodity, bool success, double price = 0)
         {
             var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
@@ -232,8 +249,16 @@ namespace Bazaar
 
             if (success)
             {
-                newMinPrice = 0.5 * minPrice + 0.5 * price;
-                newMaxPrice = 0.5 * maxPrice + 0.5 * price;
+                if (type == OfferType.Buy)
+                {
+                    newMinPrice = 0.5 * minPrice + 0.5 * (0.95 * price);
+                    newMaxPrice = 0.5 * maxPrice + 0.5 * price;
+                }
+                else if (type == OfferType.Sell)
+                {
+                    newMinPrice = 0.5 * minPrice + 0.5 * price;
+                    newMaxPrice = 0.5 * maxPrice + 0.5 * (1.05 * price);
+                }
             }
             else
             {

@@ -6,7 +6,16 @@ namespace Bazaar
 {
     public class PriceBeliefs
     {
-        private Dictionary<string, (double, double)> priceBeliefs = new Dictionary<string, (double, double)>();
+        private readonly double minimum;
+        private readonly double maximum;
+
+        private readonly Dictionary<string, (double, double)> priceBeliefs = new Dictionary<string, (double, double)>();
+
+        public PriceBeliefs(double minimum, double maximum)
+        {
+            this.minimum = minimum;
+            this.maximum = maximum;
+        }
 
         public (double, double) Get(string commodity)
         {
@@ -23,8 +32,8 @@ namespace Bazaar
         public void Set(string commodity, double minPrice, double maxPrice)
         {
             this.priceBeliefs[commodity] = (
-                Math.Max(1, minPrice),
-                Math.Max(1, maxPrice)
+                Math.Min(Math.Max(this.minimum, minPrice), this.maximum),
+                Math.Min(Math.Max(this.minimum, maxPrice), this.maximum)
             );
         }
 
