@@ -13,21 +13,19 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
         private static readonly double NUTRITION_EATEN = 1.0;
         private static readonly double FAVORABILITY_THRESHOLD = 0.1;
 
-        public bool Eaten { get; private set; }
+        private static readonly Dictionary<string, double> COMMODITY_NUTRITION = new Dictionary<string, double>
+        {
+            { Constants.Bread, 1.25 },
+            { Constants.Fish, 0.75 },
+            { Constants.Apples, 0.5 },
+        };
 
-        private readonly Dictionary<string, double> foodNutrition;
+        public bool Eaten { get; private set; }
 
         private Dictionary<string, double> favorability;
 
         public EatBehavior(Agent agent) : base(agent) 
         {
-            this.foodNutrition = new Dictionary<string, double>
-            {
-                { Constants.Bread, 1.25 },
-                { Constants.Fish, 0.75 },
-                { Constants.Apples, 0.5 },
-            };
-
             this.Agent.Inventory.Add(Constants.Bread, 2);
         }
 
@@ -40,7 +38,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
             foreach (var pair in this.favorability)
             {
                 var (commodity, percent) = (pair.Key, pair.Value); 
-                var nutrition = this.foodNutrition[commodity];
+                var nutrition = COMMODITY_NUTRITION[commodity];
 
                 var amount = Math.Min(
                     percent * NUTRITION_DAILY / nutrition,
@@ -63,7 +61,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
                     break;
                 }
 
-                var nutrition = this.foodNutrition[commodity];
+                var nutrition = COMMODITY_NUTRITION[commodity];
 
                 var amount = Math.Min(
                     (NUTRITION_DAILY - totalNutrition) / nutrition,
@@ -87,7 +85,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
         private void UpdateFavorability()
         {
-            var initialList = this.foodNutrition
+            var initialList = COMMODITY_NUTRITION
                 .Select(pair =>
                 {
                     var (commodity, nutrition) = (pair.Key, pair.Value);
@@ -117,7 +115,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
             foreach (var pair in this.favorability)
             {
                 var (commodity, percent) = (pair.Key, pair.Value);
-                var nutrition = this.foodNutrition[commodity];
+                var nutrition = COMMODITY_NUTRITION[commodity];
                 yield return this.Buy(
                     commodity,
                     2 * percent * NUTRITION_DAILY / nutrition

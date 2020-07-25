@@ -19,13 +19,6 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
         private readonly EatBehavior eat;
         private readonly ProduceBehaviorOptions options;
 
-        private string commodity => this.options.Commodity;
-        private double limit => this.options.BaseAmount * this.options.EatFactor * this.options.ToolsFactor;
-        private double baseAmount => this.options.BaseAmount;
-        private double eatFactor => this.options.EatFactor;
-        private double toolsFactor => this.options.ToolsFactor;
-        private double toolsBreakChance => this.options.ToolsBreakChance;
-
         public ProduceBehavior(
             Agent agent,
             EatBehavior eat,
@@ -38,27 +31,27 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
         public override void Perform()
         {
-
-            if (this.Agent.Inventory.Get(this.commodity) < this.limit)
+            var limit = this.options.BaseAmount * this.options.EatFactor * this.options.ToolsFactor;
+            if (this.Agent.Inventory.Get(this.options.Commodity) < limit)
             {
-                var amount = this.baseAmount;
+                var amount = this.options.BaseAmount;
 
                 if (this.eat.Eaten)
                 {
-                    amount *= this.eatFactor;
+                    amount *= this.options.EatFactor;
                 }
 
                 if (0 < this.Agent.Inventory.Get(Constants.Tools))
                 {
-                    amount *= this.toolsFactor;
+                    amount *= this.options.ToolsFactor;
 
-                    if (this.Random.NextDouble() < this.toolsBreakChance)
+                    if (this.Random.NextDouble() < this.options.ToolsBreakChance)
                     {
                         this.Agent.Consume(Constants.Tools, 1);
                     }
                 }
 
-                this.Agent.Produce(this.commodity, amount);
+                this.Agent.Produce(this.options.Commodity, amount);
 
             }
             else
@@ -70,7 +63,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
         public override IEnumerable<Offer> GenerateOffers()
         {
             yield return this.Buy(Constants.Tools, 2);
-            yield return this.Sell(this.commodity);
+            yield return this.Sell(this.options.Commodity);
         }
     }
 }
