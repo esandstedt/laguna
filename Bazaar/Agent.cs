@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Bazaar
 {
-    public abstract class Agent
+    public abstract class Agent 
     {
 
         private static readonly double MINIMUM_PRICE = 1;
@@ -16,12 +16,10 @@ namespace Bazaar
 
         public string Type { get; }
         public List<AgentBehavior> Behaviors = new List<AgentBehavior>();
-        public Inventory Inventory { get; set; } = new Inventory();
+        public Market Market { get; }
+        public Inventory Inventory { get; } = new Inventory();
         public PriceBeliefs PriceBeliefs = new PriceBeliefs(MINIMUM_PRICE, MAXIMUM_PRICE);
 
-        private Random random = new Random();
-        private List<(string, double)> buys = new List<(string, double)>();
-        private List<string> sells = new List<string>();
         private Dictionary<string, double> consumes = new Dictionary<string, double>();
         private Dictionary<string, double> produces = new Dictionary<string, double>();
         private List<(double, double)> unitCosts = new List<(double, double)>();
@@ -29,6 +27,7 @@ namespace Bazaar
         public Agent(Market market, string type)
         {
             this.Type = type;
+            this.Market = market;
             this.InitializePriceBeliefs(market);
         }
 
@@ -66,14 +65,98 @@ namespace Bazaar
 
         public virtual void Step()
         {
-            this.consumes.Clear();
-            this.produces.Clear();
+            this.UpdateUnitCostsBefore();
 
             foreach (var behavior in this.Behaviors)
             {
                 behavior.Perform();
             }
 
+            this.UpdateUnitCostsAfter();
+        }
+
+        public IEnumerable<Offer> GenerateOffers()
+        {
+            var money = this.Inventory.Get("money");
+
+            var offers = this.Behaviors
+                .SelectMany(x => x.GenerateOffers())
+                .ToList();
+
+            var buyOffers = offers.Where(x => x.Type == OfferType.Buy)
+                .SelectMany(x => x.Split(1))
+                .OrderBy(x => Guid.NewGuid());
+
+            var sellOffers = offers.Where(x => x.Type == OfferType.Sell);
+
+            foreach (var offer in buyOffers)
+            {
+                money -= offer.Price * offer.Amount;
+
+                if (money < 0)
+                {
+                    break;
+                }
+
+                yield return offer;
+            }
+
+            foreach (var offer in sellOffers)
+            {
+                yield return offer;
+            }
+        }
+
+        public void UpdatePriceModel(OfferType type, string commodity, bool success, double price = 0)
+        {
+            var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
+            var money = this.Inventory.Get("money");
+
+            var newMinPrice = minPrice;
+            var newMaxPrice = maxPrice;
+
+            if (success)
+            {
+                if (type == OfferType.Buy)
+                {
+                    newMinPrice = 0.5 * minPrice + 0.5 * (0.95 * price);
+                    newMaxPrice = 0.5 * maxPrice + 0.5 * price;
+                }
+                else if (type == OfferType.Sell)
+                {
+                    newMinPrice = 0.5 * minPrice + 0.5 * price;
+                    newMaxPrice = 0.5 * maxPrice + 0.5 * (1.05 * price);
+                }
+            }
+            else
+            {
+                if (type == OfferType.Buy)
+                {
+                    newMinPrice = minPrice;
+                    newMaxPrice = Math.Min(1.05 * maxPrice, money);
+                }
+                else if (type == OfferType.Sell)
+                {
+                    newMinPrice = 0.95 * minPrice;
+                    newMaxPrice = maxPrice;
+                }
+            }
+
+            this.PriceBeliefs.Set(
+                commodity,
+                newMinPrice,
+                newMaxPrice
+            );
+        }
+
+        private void UpdateUnitCostsBefore()
+        {
+            this.consumes.Clear();
+            this.produces.Clear();
+        }
+
+        private void UpdateUnitCostsAfter()
+        {
             var totalCount = this.produces.Sum(x => x.Value);
             if (totalCount != 0)
             {
@@ -129,163 +212,6 @@ namespace Bazaar
 
                 }
             }
-
-        }
-
-        public IEnumerable<Offer> GenerateOffers()
-        {
-            var money = this.Inventory.Get("money");
-
-            var offers = this.Behaviors
-                .SelectMany(x => x.GenerateOffers())
-                .ToList();
-
-            var buyOffers = offers
-                .Where(x => x.Type == OfferType.Buy)
-                .SelectMany(x => this.SplitOffer(x, 1));
-
-            foreach (var offer in buyOffers)
-            {
-                money -= offer.Price * offer.Amount;
-
-                if (money < 0)
-                {
-                    break;
-                }
-
-                yield return offer;
-            }
-
-            foreach (var offer in offers.Where(x => x.Type == OfferType.Sell))
-            {
-                yield return offer;
-            }
-
-            foreach (var (commodity, desiredAmount) in this.buys)
-            {
-                var amount = this.Inventory.Get(commodity);
-                if (amount < desiredAmount)
-                {
-                    var offer = this.CreateBuyOffer(commodity, desiredAmount - amount, money);
-                    if (offer != null)
-                    {
-                        money -= offer.Amount * offer.Price;
-                        yield return offer;
-                    }
-                }
-            }
-
-            foreach (var commodity in this.sells)
-            {
-                var amount = this.Inventory.Get(commodity);
-                if (0 < amount)
-                {
-                    yield return this.CreateSellOffer(commodity, amount);
-                }
-            }
-        }
-
-        private IEnumerable<Offer> SplitOffer(Offer offer, double splitAmount)
-        {
-            var amount = offer.Amount;
-            while (splitAmount < amount)
-            {
-                amount -= splitAmount;
-
-                var clone = offer.Clone();
-                clone.Amount = splitAmount;
-                yield return clone;
-            }
-
-            {
-                var clone = offer.Clone();
-                clone.Amount = amount;
-                yield return clone;
-            }
-        }
-
-        private Offer CreateBuyOffer(string commodity, double amount, double money)
-        {
-            var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
-            var price = minPrice + this.random.NextDouble() * (maxPrice - minPrice);
-
-            amount = Math.Min(amount, Math.Floor(money / price));
-
-            return new Offer
-            {
-                Agent = this,
-                Type = OfferType.Buy,
-                Commodity = commodity,
-                Amount = amount,
-                Price = price
-            };
-        }
-
-        private Offer CreateSellOffer(string commodity, double amount)
-        {
-            var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
-            var price = minPrice + this.random.NextDouble() * (maxPrice - minPrice);
-
-            return new Offer
-            {
-                Agent = this,
-                Type = OfferType.Sell,
-                Commodity = commodity,
-                Amount = amount,
-                Price = price
-            };
-        }
-
-        public void UpdatePriceModel(OfferType type, string commodity, bool success, double price = 0)
-        {
-            var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
-            var money = this.Inventory.Get("money");
-
-            var newMinPrice = minPrice;
-            var newMaxPrice = maxPrice;
-
-            if (success)
-            {
-                if (type == OfferType.Buy)
-                {
-                    newMinPrice = 0.5 * minPrice + 0.5 * (0.95 * price);
-                    newMaxPrice = 0.5 * maxPrice + 0.5 * price;
-                }
-                else if (type == OfferType.Sell)
-                {
-                    newMinPrice = 0.5 * minPrice + 0.5 * price;
-                    newMaxPrice = 0.5 * maxPrice + 0.5 * (1.05 * price);
-                }
-            }
-            else
-            {
-                if (type == OfferType.Buy)
-                {
-                    newMinPrice = minPrice;
-                    newMaxPrice = Math.Min(1.05 * maxPrice, money);
-                }
-                else if (type == OfferType.Sell)
-                {
-                    newMinPrice = 0.95 * minPrice;
-                    newMaxPrice = maxPrice;
-                }
-            }
-
-            this.PriceBeliefs.Set(
-                commodity,
-                newMinPrice,
-                newMaxPrice
-            );
-        }
-
-        protected void Buys(string commodity, int amount)
-        {
-            this.buys.Add((commodity, amount));
-        }
-
-        protected void Sells(string commodity)
-        {
-            this.sells.Add(commodity);
         }
 
         public void Consume(string commodity, double amount)
