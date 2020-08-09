@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace Bazaar.Example.ConsoleApp.Behaviors
@@ -18,6 +16,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
             { Constants.Bread, 1.25 },
             { Constants.Fish, 0.75 },
             { Constants.Apples, 0.5 },
+            { Constants.Oranges, 0.5 },
         };
 
         public bool Eaten { get; private set; }

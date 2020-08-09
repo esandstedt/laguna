@@ -21,7 +21,8 @@ namespace Bazaar.Example.ConsoleApp
                     {
                         { Constants.Grain, 0.25 },
                         { Constants.Fish, 2 },
-                        { Constants.Apples, 0.05 },
+                        { Constants.Apples, 0.01 },
+                        { Constants.Oranges, 0.5 },
                         { Constants.Logs, 1 },
                         { Constants.Ore, 0.5 },
                     }
@@ -34,8 +35,9 @@ namespace Bazaar.Example.ConsoleApp
                     Production = new Dictionary<string, double>
                     {
                         { Constants.Grain, 4 },
-                        { Constants.Fish, 0.25 },
+                        { Constants.Fish, 0.05 },
                         { Constants.Apples, 0.75 },
+                        { Constants.Oranges, 0.25 },
                         { Constants.Logs, 1 },
                         { Constants.Ore, 0.5 },
                     }
@@ -49,26 +51,31 @@ namespace Bazaar.Example.ConsoleApp
                 var firstBread = first.Market.History[Constants.Bread].First();
                 var firstFish = first.Market.History[Constants.Fish].First();
                 var firstApples = first.Market.History[Constants.Apples].First();
+                var firstOranges = first.Market.History[Constants.Oranges].First();
                 var secondBread = second.Market.History[Constants.Bread].First();
                 var secondFish = second.Market.History[Constants.Fish].First();
                 var secondApples = second.Market.History[Constants.Apples].First();
+                var secondOranges = second.Market.History[Constants.Oranges].First();
 
                 Console.WriteLine(
-                    "{0,5}: {1,3} || {2,4} {3,6:F2} | {4,4} {5,6:F2} | {6,4} {7,6:F2} || {8,4} {9,6:F2} | {10,4} {11,6:F2} | {12,4} {13,6:F2}", 
+                    "{0,5} || {1,4} {2,6:F2} | {3,4} {4,6:F2} | {5,4} {6,6:F2} {7,4} {8,6:F2} || {9,4} {10,6:F2} | {11,4} {12,6:F2} | {13,4} {14,6:F2} | {15,4} {16,6:F2}", 
                     i,
-                    0,
                     (int)firstBread.AmountTraded,
                     firstBread.AveragePrice,
                     (int)firstFish.AmountTraded,
                     firstFish.AveragePrice,
                     (int)firstApples.AmountTraded,
                     firstApples.AveragePrice,
+                    (int)firstOranges.AmountTraded,
+                    firstOranges.AveragePrice,
                     (int)secondBread.AmountTraded,
                     secondBread.AveragePrice,
                     (int)secondFish.AmountTraded,
                     secondFish.AveragePrice,
                     (int)secondApples.AmountTraded,
-                    secondApples.AveragePrice
+                    secondApples.AveragePrice,
+                    (int)secondOranges.AmountTraded,
+                    secondOranges.AveragePrice
                 );
             }
 

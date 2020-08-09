@@ -11,6 +11,7 @@ namespace Bazaar.Example.ConsoleApp.Agents
         {
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);
+
             this.Behaviors.Add(new ProduceBehavior(
                 this,
                 eat,
@@ -21,6 +22,17 @@ namespace Bazaar.Example.ConsoleApp.Agents
                     ToolsBreakChance = 0.1
                 }
             ));
+            this.Behaviors.Add(new ProduceBehavior(
+                this,
+                eat,
+                new AreaProduceBehaviorOptions(town.Area, Constants.Oranges)
+                {
+                    EatFactor = 2,
+                    ToolsFactor = 2,
+                    ToolsBreakChance = 0.1
+                }
+            ));
+
             this.Behaviors.Add(new WorkerBehavior(this));
 
             this.Inventory.Add(Constants.Money, 100);

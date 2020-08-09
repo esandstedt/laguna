@@ -12,6 +12,7 @@ namespace Bazaar.Example.ConsoleApp
         public const string Bread = "bread";
         public const string Fish = "fish";
         public const string Apples = "apples";
+        public const string Oranges = "oranges";
 
         public const string Logs = "logs";
         public const string Planks = "planks";
