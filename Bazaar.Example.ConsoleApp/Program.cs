@@ -12,9 +12,11 @@ namespace Bazaar.Example.ConsoleApp
     {
         public static void Main(string[] args)
         {
-            var first = new Town(
+            var world = new World();
+
+            var first = world.AddTown(
                 new Area
-                { 
+                {
                     Production = new Dictionary<string, double>
                     {
                         { Constants.Grain, 0.25 },
@@ -26,9 +28,9 @@ namespace Bazaar.Example.ConsoleApp
                 }
             );
 
-            var second = new Town(
+            var second = world.AddTown(
                 new Area
-                { 
+                {
                     Production = new Dictionary<string, double>
                     {
                         { Constants.Grain, 4 },
@@ -42,8 +44,7 @@ namespace Bazaar.Example.ConsoleApp
 
             for (var i = 0; i < 2000; i++)
             {
-                first.Step();
-                second.Step();
+                world.Step();
 
                 var firstBread = first.Market.History[Constants.Bread].First();
                 var firstFish = first.Market.History[Constants.Fish].First();

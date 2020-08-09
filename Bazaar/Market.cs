@@ -14,26 +14,12 @@ namespace Bazaar
 
         public Dictionary<string, List<MarketHistory>> History { get; set; } = new Dictionary<string, List<MarketHistory>>();
 
-        public Market()
-        {
-
-        }
-
         public void Step()
         {
-            var offers = new List<Offer>();
+            var offers = this.Agents
+                .SelectMany(x => x.GenerateOffers())
+                .ToList();
 
-            foreach (var agent in Agents)
-            {
-                agent.Step();
-                offers.AddRange(agent.GenerateOffers());
-            }
-
-            this.ResolveOffers(offers);
-        }
-
-        private void ResolveOffers(List<Offer> offers)
-        {
             foreach (var group in offers.GroupBy(x => x.Commodity))
             {
                 var commodity = group.Key;
