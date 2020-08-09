@@ -69,7 +69,7 @@ namespace Bazaar
                         }
                         
                         this.unitCosts[commodity].Insert(0, (minUnitCost, maxUnitCost));
-                        if (20 < this.unitCosts.Count)
+                        if (20 < this.unitCosts[commodity].Count)
                         {
                             this.unitCosts[commodity].RemoveAt(this.unitCosts.Count - 1);
                         }

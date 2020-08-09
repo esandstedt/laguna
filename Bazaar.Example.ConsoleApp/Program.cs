@@ -22,7 +22,7 @@ namespace Bazaar.Example.ConsoleApp
                         { Constants.Grain, 0.25 },
                         { Constants.Fish, 2 },
                         { Constants.Apples, 0.01 },
-                        { Constants.Oranges, 0.5 },
+                        { Constants.Oranges, 0.01 },
                         { Constants.Logs, 1 },
                         { Constants.Ore, 0.5 },
                     }
@@ -36,8 +36,8 @@ namespace Bazaar.Example.ConsoleApp
                     {
                         { Constants.Grain, 4 },
                         { Constants.Fish, 0.05 },
-                        { Constants.Apples, 0.75 },
-                        { Constants.Oranges, 0.25 },
+                        { Constants.Apples, 0.8 },
+                        { Constants.Oranges, 0.2 },
                         { Constants.Logs, 1 },
                         { Constants.Ore, 0.5 },
                     }
