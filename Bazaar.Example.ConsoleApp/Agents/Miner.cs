@@ -7,14 +7,14 @@ namespace Bazaar.Example.ConsoleApp.Agents
 {
     public class Miner : Agent
     {
-        public Miner(Market market, Area area) : base(market, "miner")
+        public Miner(Town town) : base(town.Market, "miner")
         {
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);
             this.Behaviors.Add(new ProduceBehavior(
                 this,
                 eat,
-                new AreaProduceBehaviorOptions(area, Constants.Ore)
+                new AreaProduceBehaviorOptions(town.Area, Constants.Ore)
                 {
                     EatFactor = 2,
                     ToolsFactor = 4,

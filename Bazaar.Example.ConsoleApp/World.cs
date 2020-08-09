@@ -32,21 +32,21 @@ namespace Bazaar.Example.ConsoleApp
         {
             var agent = new List<Func<Agent>>
             {
-                () => new Farmer(town.Market, town.Area),
-                () => new Miller(town.Market),
-                () => new Baker(town.Market),
-                () => new Fisherman(town.Market, town.Area),
-                () => new Orchardist(town.Market, town.Area),
-                () => new Lumberjack(town.Market, town.Area),
-                () => new Sawyer(town.Market),
-                () => new Miner(town.Market, town.Area),
-                () => new Refiner(town.Market),
-                () => new Blacksmith(town.Market),
+                () => new Farmer(town),
+                () => new Miller(town),
+                () => new Baker(town),
+                () => new Fisherman(town),
+                () => new Orchardist(town),
+                () => new Lumberjack(town),
+                () => new Sawyer(town),
+                () => new Miner(town),
+                () => new Refiner(town),
+                () => new Blacksmith(town),
             }
                 .Random()
                 .Invoke();
 
-            town.Market.Agents.Add(agent);
+            town.AddAgent(agent);
         }
 
 
@@ -68,13 +68,13 @@ namespace Bazaar.Example.ConsoleApp
 
         private void ReplaceBankruptAgents(Town town)
         {
-            var agents = town.Market.Agents
+            var agents = town.Agents
                 .Where(x => x.Inventory.Get(Constants.Money) < 0)
                 .ToList();
 
             foreach (var agent in agents)
             {
-                town.Market.Agents.Remove(agent);
+                town.RemoveAgent(agent);
             }
 
             for (var i = 0; i < agents.Count; i++)

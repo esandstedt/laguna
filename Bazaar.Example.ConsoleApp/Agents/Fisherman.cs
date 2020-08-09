@@ -7,14 +7,14 @@ namespace Bazaar.Example.ConsoleApp.Agents
 {
     public class Fisherman : Agent
     {
-        public Fisherman(Market market, Area area) : base(market, "fisherman")
+        public Fisherman(Town town) : base(town.Market, "fisherman")
         {
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);
             this.Behaviors.Add(new ProduceBehavior(
                 this,
                 eat,
-                new AreaProduceBehaviorOptions(area, Constants.Fish)
+                new AreaProduceBehaviorOptions(town.Area, Constants.Fish)
                 {
                     EatFactor = 2,
                     ToolsFactor = 2,

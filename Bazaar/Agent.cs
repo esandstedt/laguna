@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace Bazaar
 {
@@ -15,19 +12,21 @@ namespace Bazaar
         private static readonly double MAXIMUM_PRICE = 100;
 
         public string Type { get; }
-        public List<AgentBehavior> Behaviors = new List<AgentBehavior>();
+        public List<AgentBehavior> Behaviors { get; }
         public Market Market { get; }
-        public Inventory Inventory { get; } = new Inventory();
-        public PriceBeliefs PriceBeliefs = new PriceBeliefs(MINIMUM_PRICE, MAXIMUM_PRICE);
-
-        private Dictionary<string, double> consumes = new Dictionary<string, double>();
-        private Dictionary<string, double> produces = new Dictionary<string, double>();
-        private List<(double, double)> unitCosts = new List<(double, double)>();
+        public Inventory Inventory { get; } 
+        public PriceBeliefs PriceBeliefs { get; }
+        public UnitCostBeliefs UnitCostBeliefs { get; }
 
         public Agent(Market market, string type)
         {
-            this.Type = type;
             this.Market = market;
+            this.Type = type;
+            this.Behaviors = new List<AgentBehavior>();
+            this.Inventory = new Inventory();
+            this.PriceBeliefs = new PriceBeliefs(MINIMUM_PRICE, MAXIMUM_PRICE);
+            this.UnitCostBeliefs = new UnitCostBeliefs(this.PriceBeliefs, MINIMUM_PRICE);
+
             this.InitializePriceBeliefs(market);
         }
 
@@ -65,14 +64,14 @@ namespace Bazaar
 
         public virtual void Step()
         {
-            this.UpdateUnitCostsBefore();
+            this.UnitCostBeliefs.Begin();
 
             foreach (var behavior in this.Behaviors)
             {
                 behavior.Perform();
             }
 
-            this.UpdateUnitCostsAfter();
+            this.UnitCostBeliefs.End();
         }
 
         public IEnumerable<Offer> GenerateOffers()
@@ -149,93 +148,16 @@ namespace Bazaar
             );
         }
 
-        private void UpdateUnitCostsBefore()
-        {
-            this.consumes.Clear();
-            this.produces.Clear();
-        }
-
-        private void UpdateUnitCostsAfter()
-        {
-            var totalCount = this.produces.Sum(x => x.Value);
-            if (totalCount != 0)
-            {
-                var (minTotalCost, maxTotalCost) = this.consumes
-                    .Select(pair =>
-                    {
-                        var (minPrice, maxPrice) = this.PriceBeliefs.Get(pair.Key);
-                        return (
-                            pair.Value * minPrice,
-                            pair.Value * maxPrice
-                        );
-                    })
-                    .Aggregate((acc, x) => (acc.Item1 + x.Item1, acc.Item2 + x.Item2));
-
-                var minUnitCost = minTotalCost / totalCount;
-                var maxUnitCost = maxTotalCost / totalCount;
-
-                this.unitCosts.Insert(0, (minUnitCost, maxUnitCost));
-                if (20 < this.unitCosts.Count)
-                {
-                    this.unitCosts.RemoveAt(this.unitCosts.Count - 1);
-                }
-
-                var avgMinUnitCost = this.unitCosts.Average(x => x.Item1);
-                var avgMaxUnitCost = this.unitCosts.Average(x => x.Item2);
-
-                foreach (var commodity in this.produces.Keys)
-                {
-                    var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
-
-                    var newMinPrice = 0.75 * minPrice + 0.25 * (1.05 * avgMinUnitCost);
-                    var newMaxPrice = 0.75 * maxPrice + 0.25 * (1.05 * avgMaxUnitCost);
-
-                    this.PriceBeliefs.Set(
-                        commodity,
-                        newMinPrice,
-                        newMaxPrice
-                    );
-                }
-
-                if (0 < minUnitCost && minUnitCost < MINIMUM_PRICE)
-                {
-                    foreach (var commodity in this.consumes.Keys)
-                    {
-                        var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
-
-                        this.PriceBeliefs.Set(
-                            commodity,
-                            MINIMUM_PRICE * minPrice / minUnitCost,
-                            MINIMUM_PRICE * maxPrice / minUnitCost
-                        );
-                    }
-
-                }
-            }
-        }
-
         public void Consume(string commodity, double amount)
         {
             this.Inventory.Remove(commodity, amount);
-
-            if (!this.consumes.ContainsKey(commodity))
-            {
-                this.consumes[commodity] = 0;
-            }
-
-            this.consumes[commodity] += amount;
+            this.UnitCostBeliefs.Consume(commodity, amount);
         }
 
         public void Produce(string commodity, double amount)
         {
             this.Inventory.Add(commodity, amount);
-
-            if (!this.produces.ContainsKey(commodity))
-            {
-                this.produces[commodity] = 0;
-            }
-
-            this.produces[commodity] += amount;
+            this.UnitCostBeliefs.Produce(commodity, amount);
         }
 
     }
