@@ -35,6 +35,8 @@ namespace Bazaar.Example.ConsoleApp.Agents
 
             if (bread < 32)
             {
+                this.Agent.CostBeliefs.BeginUnit();
+
                 var hasTools = 0 < tools;
                 var eaten = this.eat.Eaten;
 
@@ -48,6 +50,8 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 {
                     this.Agent.Consume(Constants.Tools, 1);
                 }
+
+                this.Agent.CostBeliefs.EndUnit();
             }
             else
             {

@@ -36,6 +36,8 @@ namespace Bazaar.Example.ConsoleApp.Agents
 
             if (metal < 8)
             {
+                this.Agent.CostBeliefs.BeginUnit();
+
                 var hasTools = 0 < tools;
                 var eaten = this.eat.Eaten;
 
@@ -49,6 +51,8 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 {
                     this.Agent.Consume(Constants.Tools, 1);
                 }
+
+                this.Agent.CostBeliefs.EndUnit();
             }
             else
             {

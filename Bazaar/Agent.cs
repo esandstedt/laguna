@@ -16,7 +16,7 @@ namespace Bazaar
         public Market Market { get; }
         public Inventory Inventory { get; } 
         public PriceBeliefs PriceBeliefs { get; }
-        public UnitCostBeliefs UnitCostBeliefs { get; }
+        public CostBeliefs CostBeliefs { get; }
 
         public Agent(Market market, string type)
         {
@@ -25,7 +25,7 @@ namespace Bazaar
             this.Behaviors = new List<AgentBehavior>();
             this.Inventory = new Inventory();
             this.PriceBeliefs = new PriceBeliefs(MINIMUM_PRICE, MAXIMUM_PRICE);
-            this.UnitCostBeliefs = new UnitCostBeliefs(this.PriceBeliefs, MINIMUM_PRICE);
+            this.CostBeliefs = new CostBeliefs(this.PriceBeliefs, MINIMUM_PRICE);
 
             this.InitializePriceBeliefs(market);
         }
@@ -64,14 +64,14 @@ namespace Bazaar
 
         public virtual void Step()
         {
-            this.UnitCostBeliefs.Begin();
+            this.CostBeliefs.Begin();
 
             foreach (var behavior in this.Behaviors)
             {
                 behavior.Perform();
             }
 
-            this.UnitCostBeliefs.End();
+            this.CostBeliefs.End();
         }
 
         public IEnumerable<Offer> GenerateOffers()
@@ -151,13 +151,13 @@ namespace Bazaar
         public void Consume(string commodity, double amount)
         {
             this.Inventory.Remove(commodity, amount);
-            this.UnitCostBeliefs.Consume(commodity, amount);
+            this.CostBeliefs.Consume(commodity, amount);
         }
 
         public void Produce(string commodity, double amount)
         {
             this.Inventory.Add(commodity, amount);
-            this.UnitCostBeliefs.Produce(commodity, amount);
+            this.CostBeliefs.Produce(commodity, amount);
         }
 
     }

@@ -52,6 +52,8 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
             var limit = this.options.BaseAmount * this.options.EatFactor * this.options.ToolsFactor;
             if (this.Agent.Inventory.Get(this.options.Commodity) < limit)
             {
+                this.Agent.CostBeliefs.BeginUnit();
+
                 var amount = this.options.BaseAmount;
 
                 if (this.eat.Eaten)
@@ -71,6 +73,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
                 this.Agent.Produce(this.options.Commodity, amount);
 
+                this.Agent.CostBeliefs.EndUnit();
             }
             else
             {

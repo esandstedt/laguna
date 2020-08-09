@@ -41,6 +41,8 @@ namespace Bazaar.Example.ConsoleApp.Agents
 
                 if (hasTools && hasPlanks)
                 {
+                    this.Agent.CostBeliefs.BeginUnit();
+
                     this.Agent.Produce(Constants.Grain, 3 * baseAmount);
                     this.Agent.Consume(Constants.Planks, 0.25);
 
@@ -48,11 +50,17 @@ namespace Bazaar.Example.ConsoleApp.Agents
                     {
                         this.Agent.Consume(Constants.Tools, 1);
                     }
+
+                    this.Agent.CostBeliefs.EndUnit();
                 }
                 else if (hasPlanks)
                 {
+                    this.Agent.CostBeliefs.BeginUnit();
+
                     this.Agent.Produce(Constants.Grain, baseAmount);
                     this.Agent.Consume(Constants.Planks, 0.5);
+
+                    this.Agent.CostBeliefs.EndUnit();
                 }
                 else
                 {
