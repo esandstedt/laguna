@@ -44,14 +44,13 @@ namespace Bazaar
             var (minPrice, maxPrice) = this.Agent.PriceBeliefs.Get(commodity);
             var price = minPrice + this.Random.NextDouble() * (maxPrice - minPrice);
 
-            return new Offer
-            {
-                Agent = this.Agent,
-                Type = OfferType.Buy,
-                Commodity = commodity,
-                Amount = amount,
-                Price = price
-            };
+            return new Offer(
+                this.Agent,
+                OfferType.Buy,
+                commodity,
+                price,
+                amount
+            );
         }
 
         protected Offer Sell(string commodity, double minAmount = 0)
@@ -67,14 +66,13 @@ namespace Bazaar
             var (minPrice, maxPrice) = this.Agent.PriceBeliefs.Get(commodity);
             var price = minPrice + this.Random.NextDouble() * (maxPrice - minPrice);
 
-            return new Offer
-            {
-                Agent = this.Agent,
-                Type = OfferType.Sell,
-                Commodity = commodity,
-                Amount = amount,
-                Price = price
-            };
+            return new Offer(
+                this.Agent,
+                OfferType.Sell,
+                commodity,
+                price,
+                amount
+            );
         }
     }
 }

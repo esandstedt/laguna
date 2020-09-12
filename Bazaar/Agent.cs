@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Bazaar
 {
-    public abstract class Agent 
+    public abstract class Agent : IOfferPrincipal
     {
 
         private static readonly double MINIMUM_PRICE = 1;
@@ -32,10 +32,10 @@ namespace Bazaar
 
         private void InitializePriceBeliefs(Market market)
         {
-            foreach (var commodity in market.History.Keys)
+            foreach (var commodity in market.GetCommodities())
             {
-                IList<MarketHistory> history = market.History.GetValueOrDefault(commodity);
-                if (history != null)
+                IList<MarketHistory> history = market.GetHistory(commodity);
+                if (history.Any())
                 {
                     var list = history.Take(10).ToList();
 
@@ -72,9 +72,11 @@ namespace Bazaar
             }
 
             this.CostBeliefs.End();
+
+            this.CreateOffers();
         }
 
-        public IEnumerable<Offer> GenerateOffers()
+        private void CreateOffers()
         {
             var money = this.Inventory.Get("money");
 
@@ -97,16 +99,38 @@ namespace Bazaar
                     break;
                 }
 
-                yield return offer;
+                this.Market.AddOffer(offer);
             }
 
             foreach (var offer in sellOffers)
             {
-                yield return offer;
+                this.Market.AddOffer(offer);
             }
         }
 
-        public void UpdatePriceModel(OfferType type, string commodity, bool success, double price = 0)
+        public void Consume(string commodity, double amount)
+        {
+            this.Inventory.Remove(commodity, amount);
+            this.CostBeliefs.Consume(commodity, amount);
+        }
+
+        public void Produce(string commodity, double amount)
+        {
+            this.Inventory.Add(commodity, amount);
+            this.CostBeliefs.Produce(commodity, amount);
+        }
+
+        void IOfferPrincipal.AddInventory(string commodity, double amount)
+        {
+            this.Inventory.Add(commodity, amount);
+        }
+
+        void IOfferPrincipal.RemoveInventory(string commodity, double amount)
+        {
+            this.Inventory.Remove(commodity, amount);
+        }
+
+        void IOfferPrincipal.UpdatePriceModel(OfferType type, string commodity, bool success, double price)
         {
             var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
             var money = this.Inventory.Get("money");
@@ -147,18 +171,5 @@ namespace Bazaar
                 newMaxPrice
             );
         }
-
-        public void Consume(string commodity, double amount)
-        {
-            this.Inventory.Remove(commodity, amount);
-            this.CostBeliefs.Consume(commodity, amount);
-        }
-
-        public void Produce(string commodity, double amount)
-        {
-            this.Inventory.Add(commodity, amount);
-            this.CostBeliefs.Produce(commodity, amount);
-        }
-
     }
 }

@@ -48,14 +48,14 @@ namespace Bazaar.Example.ConsoleApp
             {
                 world.Step();
 
-                var firstBread = first.Market.History[Constants.Bread].First();
-                var firstFish = first.Market.History[Constants.Fish].First();
-                var firstApples = first.Market.History[Constants.Apples].First();
-                var firstOranges = first.Market.History[Constants.Oranges].First();
-                var secondBread = second.Market.History[Constants.Bread].First();
-                var secondFish = second.Market.History[Constants.Fish].First();
-                var secondApples = second.Market.History[Constants.Apples].First();
-                var secondOranges = second.Market.History[Constants.Oranges].First();
+                var firstBread = first.Market.GetHistory(Constants.Bread).First();
+                var firstFish = first.Market.GetHistory(Constants.Fish).First();
+                var firstApples = first.Market.GetHistory(Constants.Apples).First();
+                var firstOranges = first.Market.GetHistory(Constants.Oranges).First();
+                var secondBread = second.Market.GetHistory(Constants.Bread).First();
+                var secondFish = second.Market.GetHistory(Constants.Fish).First();
+                var secondApples = second.Market.GetHistory(Constants.Apples).First();
+                var secondOranges = second.Market.GetHistory(Constants.Oranges).First();
 
                 Console.WriteLine(
                     "{0,5} || {1,4} {2,6:F2} | {3,4} {4,6:F2} | {5,4} {6,6:F2} {7,4} {8,6:F2} || {9,4} {10,6:F2} | {11,4} {12,6:F2} | {13,4} {14,6:F2} | {15,4} {16,6:F2}", 
@@ -80,7 +80,7 @@ namespace Bazaar.Example.ConsoleApp
             }
 
             {
-                var firstAgentCounts = first.Market.Agents
+                var firstAgentCounts = first.Agents
                     .GroupBy(x => x.Type)
                     .Select(x => new
                     {
@@ -89,7 +89,7 @@ namespace Bazaar.Example.ConsoleApp
                     })
                     .ToList();
 
-                var secondAgentCounts = second.Market.Agents
+                var secondAgentCounts = second.Agents
                     .GroupBy(x => x.Type)
                     .Select(x => new
                     {
