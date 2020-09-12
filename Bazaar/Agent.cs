@@ -82,6 +82,7 @@ namespace Bazaar
 
             var offers = this.Behaviors
                 .SelectMany(x => x.GenerateOffers())
+                .Where(x => x != null)
                 .ToList();
 
             var buyOffers = offers.Where(x => x.Type == OfferType.Buy)

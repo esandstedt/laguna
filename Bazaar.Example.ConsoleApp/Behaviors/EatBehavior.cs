@@ -84,7 +84,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
         private void UpdateFavorability()
         {
-            var initialList = COMMODITY_NUTRITION
+            var list = COMMODITY_NUTRITION
                 .Select(pair =>
                 {
                     var (commodity, nutrition) = (pair.Key, pair.Value);
@@ -98,13 +98,6 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
                 })
                 .ToList();
 
-            var initialTotalValue = initialList.Sum(x => x.Value);
-            var initialFavorability = initialList.ToDictionary(x => x.Commodity, x => x.Value / initialTotalValue);
-
-            var list = initialList
-                .Where(x => FAVORABILITY_THRESHOLD < initialFavorability[x.Commodity])
-                .ToList();
-
             var totalValue = list.Sum(x => x.Value);
             this.favorability = list.ToDictionary(x => x.Commodity, x => x.Value / totalValue);
         }
@@ -114,11 +107,14 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
             foreach (var pair in this.favorability)
             {
                 var (commodity, percent) = (pair.Key, pair.Value);
-                var nutrition = COMMODITY_NUTRITION[commodity];
-                yield return this.Buy(
-                    commodity,
-                    2 * percent * NUTRITION_DAILY / nutrition
-                );
+
+                double amount = 0;
+                if (FAVORABILITY_THRESHOLD < percent)
+                {
+                    amount = 2 * percent * NUTRITION_DAILY / COMMODITY_NUTRITION[commodity];
+                }
+
+                yield return this.Buy(commodity, amount);
             }
         }
     }

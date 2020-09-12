@@ -16,6 +16,8 @@ namespace Bazaar
 
         public void AddOffer(Offer offer)
         {
+            if (offer == null) throw new ArgumentNullException(nameof(offer));
+
             this.offers.Add(offer);
         }
 
@@ -28,7 +30,6 @@ namespace Bazaar
                 var buys = new Stack<Offer>(
                     group
                         .Where(x => x.Type == OfferType.Buy)
-                        .Where(x => 0 < x.Amount)
                         .OrderBy(x => x.Price)
                         .ToList()
                 );
@@ -89,11 +90,13 @@ namespace Bazaar
 
                     if (buy.Amount == 0)
                     {
+                        buy.Principal.UpdatePriceModel(OfferType.Buy, commodity, true, buy.Price);
                         buys.Pop();
                     }
 
                     if (sell.Amount == 0)
                     {
+                        sell.Principal.UpdatePriceModel(OfferType.Sell, commodity, true, sell.Price);
                         sells.Pop();
                     }
                 }

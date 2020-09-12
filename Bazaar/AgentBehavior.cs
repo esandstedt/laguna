@@ -41,6 +41,11 @@ namespace Bazaar
 
         protected Offer CreateBuyOffer(string commodity, double amount)
         {
+            if (amount < 1e-6)
+            {
+                return null;
+            }
+
             var (minPrice, maxPrice) = this.Agent.PriceBeliefs.Get(commodity);
             var price = minPrice + this.Random.NextDouble() * (maxPrice - minPrice);
 
@@ -63,6 +68,11 @@ namespace Bazaar
 
         protected Offer CreateSellOffer(string commodity, double amount)
         {
+            if (amount < 1e-6)
+            {
+                return null;
+            }
+
             var (minPrice, maxPrice) = this.Agent.PriceBeliefs.Get(commodity);
             var price = minPrice + this.Random.NextDouble() * (maxPrice - minPrice);
 

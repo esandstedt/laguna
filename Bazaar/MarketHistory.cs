@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Bazaar
 {
-    public class MarketHistory
+    public struct MarketHistory
     {
         public string Commodity { get; set; }
         public int SuccessfulTrades { get; set; }

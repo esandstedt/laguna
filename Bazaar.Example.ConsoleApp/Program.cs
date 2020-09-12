@@ -48,14 +48,14 @@ namespace Bazaar.Example.ConsoleApp
             {
                 world.Step();
 
-                var firstBread = first.Market.GetHistory(Constants.Bread).First();
-                var firstFish = first.Market.GetHistory(Constants.Fish).First();
-                var firstApples = first.Market.GetHistory(Constants.Apples).First();
-                var firstOranges = first.Market.GetHistory(Constants.Oranges).First();
-                var secondBread = second.Market.GetHistory(Constants.Bread).First();
-                var secondFish = second.Market.GetHistory(Constants.Fish).First();
-                var secondApples = second.Market.GetHistory(Constants.Apples).First();
-                var secondOranges = second.Market.GetHistory(Constants.Oranges).First();
+                var firstBread = first.Market.GetHistory(Constants.Bread).FirstOrDefault();
+                var firstFish = first.Market.GetHistory(Constants.Fish).FirstOrDefault();
+                var firstApples = first.Market.GetHistory(Constants.Apples).FirstOrDefault();
+                var firstOranges = first.Market.GetHistory(Constants.Oranges).FirstOrDefault();
+                var secondBread = second.Market.GetHistory(Constants.Bread).FirstOrDefault();
+                var secondFish = second.Market.GetHistory(Constants.Fish).FirstOrDefault();
+                var secondApples = second.Market.GetHistory(Constants.Apples).FirstOrDefault();
+                var secondOranges = second.Market.GetHistory(Constants.Oranges).FirstOrDefault();
 
                 Console.WriteLine(
                     "{0,5} || {1,4} {2,6:F2} | {3,4} {4,6:F2} | {5,4} {6,6:F2} {7,4} {8,6:F2} || {9,4} {10,6:F2} | {11,4} {12,6:F2} | {13,4} {14,6:F2} | {15,4} {16,6:F2}", 
