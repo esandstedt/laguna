@@ -65,10 +65,10 @@ namespace Bazaar.Exchange
                     }
 
                     var amount = Math.Min(buy.Amount, sell.Amount);
+                    var price = sell.Price + this.random.NextDouble() * (buy.Price - sell.Price);
 
                     if (0 < amount)
                     {
-                        var price = sell.Price + this.random.NextDouble() * (buy.Price - sell.Price);
 
                         buy.Amount -= amount;
                         sell.Amount -= amount;
@@ -90,13 +90,13 @@ namespace Bazaar.Exchange
 
                     if (buy.Amount == 0)
                     {
-                        buy.Principal.UpdatePriceModel(OfferType.Buy, commodity, true, buy.Price);
+                        buy.Principal.UpdatePriceModel(OfferType.Buy, commodity, true, price);
                         buys.Pop();
                     }
 
                     if (sell.Amount == 0)
                     {
-                        sell.Principal.UpdatePriceModel(OfferType.Sell, commodity, true, sell.Price);
+                        sell.Principal.UpdatePriceModel(OfferType.Sell, commodity, true, price);
                         sells.Pop();
                     }
                 }
