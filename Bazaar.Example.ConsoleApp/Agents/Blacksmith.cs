@@ -1,4 +1,5 @@
 ﻿using Bazaar.Example.ConsoleApp.Behaviors;
+using Bazaar.Exchange;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Bazaar
+namespace Bazaar.Exchange
 {
     public class Market
     {
@@ -77,8 +77,8 @@ namespace Bazaar
                         buy.Principal.AddInventory(commodity, amount);
 
                         var money = amount * price;
-                        buy.Principal.RemoveInventory("money", money);
-                        sell.Principal.AddInventory("money", money);
+                        buy.Principal.RemoveInventory(Constants.Money, money);
+                        sell.Principal.AddInventory(Constants.Money, money);
 
                         succesfulTrades += 1;
                         moneyTraded += money;

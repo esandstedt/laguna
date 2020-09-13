@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bazaar.Exchange;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -78,7 +79,7 @@ namespace Bazaar
 
         private void CreateOffers()
         {
-            var money = this.Inventory.Get("money");
+            var money = this.Inventory.Get(Constants.Money);
 
             var offers = this.Behaviors
                 .SelectMany(x => x.GenerateOffers())
@@ -134,7 +135,7 @@ namespace Bazaar
         void IOfferPrincipal.UpdatePriceModel(OfferType type, string commodity, bool success, double price)
         {
             var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
-            var money = this.Inventory.Get("money");
+            var money = this.Inventory.Get(Constants.Money);
 
             var newMinPrice = minPrice;
             var newMaxPrice = maxPrice;

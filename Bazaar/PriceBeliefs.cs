@@ -19,7 +19,7 @@ namespace Bazaar
 
         public (double, double) Get(string commodity)
         {
-            if (commodity == "money")
+            if (commodity == Constants.Money)
             {
                 return (1, 1);
             }
@@ -31,6 +31,11 @@ namespace Bazaar
 
         public void Set(string commodity, double minPrice, double maxPrice)
         {
+            if (commodity == Constants.Money)
+            {
+                throw new InvalidOperationException();
+            }
+
             this.priceBeliefs[commodity] = (
                 Math.Min(Math.Max(this.minimum, minPrice), this.maximum),
                 Math.Min(Math.Max(this.minimum, maxPrice), this.maximum)

@@ -6,6 +6,7 @@ namespace Bazaar.Example.ConsoleApp
 {
     public class Constants
     {
+        public const string Money = Bazaar.Constants.Money;
 
         public const string Grain = "grain";
         public const string Flour = "flour";
@@ -20,8 +21,5 @@ namespace Bazaar.Example.ConsoleApp
         public const string Ore = "ore";
         public const string Metal = "metal";
         public const string Tools = "tools";
-
-        public const string Money = "money";
-
     }
 }

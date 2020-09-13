@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bazaar.Exchange;
+using System;
 using System.Collections.Generic;
 using System.Text;
 

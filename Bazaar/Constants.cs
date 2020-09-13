@@ -4,9 +4,8 @@ using System.Text;
 
 namespace Bazaar
 {
-    public enum OfferType
+    public class Constants
     {
-        Buy,
-        Sell
+        public const string Money = "money";
     }
 }

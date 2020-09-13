@@ -1,4 +1,5 @@
 ﻿using Bazaar.Example.ConsoleApp.Agents;
+using Bazaar.Exchange;
 using System;
 using System.Collections.Generic;
 using System.Linq;

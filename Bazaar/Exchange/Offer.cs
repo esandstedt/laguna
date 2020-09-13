@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bazaar
+namespace Bazaar.Exchange
 {
     public class Offer
     {

@@ -91,7 +91,7 @@ namespace Bazaar
 
                     if (0 < minUnitCost && minUnitCost < this.minimumPrice)
                     {
-                        foreach (var commodity in consumes.Keys)
+                        foreach (var commodity in consumes.Keys.Where(x => x != Constants.Money))
                         {
                             var (minPrice, maxPrice) = this.priceBeliefs.Get(commodity);
 
