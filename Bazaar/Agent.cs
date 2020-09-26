@@ -1,12 +1,22 @@
 ﻿using Bazaar.Exchange;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace Bazaar
 {
-    public abstract class Agent : IOfferPrincipal
+
+    public interface IAgent
+    {
+        string Type { get; }
+        Inventory Inventory { get; }
+        void Perform();
+        void SubmitOffers();
+        void HandleOfferResults();
+    }
+
+    public abstract class Agent : IOfferPrincipal, IAgent
     {
 
         private static readonly double MINIMUM_PRICE = 1;
@@ -19,51 +29,23 @@ namespace Bazaar
         public PriceBeliefs PriceBeliefs { get; }
         public CostBeliefs CostBeliefs { get; }
 
-        public Agent(Market market, string type)
+        private readonly List<Offer> offers; 
+
+        public Agent(string type, Market market)
         {
-            this.Market = market;
             this.Type = type;
+            this.Market = market;
             this.Behaviors = new List<AgentBehavior>();
             this.Inventory = new Inventory();
             this.PriceBeliefs = new PriceBeliefs(MINIMUM_PRICE, MAXIMUM_PRICE);
             this.CostBeliefs = new CostBeliefs(this.PriceBeliefs, MINIMUM_PRICE);
 
-            this.InitializePriceBeliefs(market);
+            this.offers = new List<Offer>();
+
+            this.PriceBeliefs.Initialize(market);
         }
 
-        private void InitializePriceBeliefs(Market market)
-        {
-            foreach (var commodity in market.GetCommodities())
-            {
-                IList<MarketHistory> history = market.GetHistory(commodity);
-                if (history.Any())
-                {
-                    var list = history.Take(10).ToList();
-
-                    var listWhereTraded = list.Where(x => 0 < x.AmountTraded).ToList();
-                    if (listWhereTraded.Any())
-                    {
-                        var avgPrice = listWhereTraded.Average(x => x.AveragePrice);
-                        this.PriceBeliefs.Set(
-                            commodity,
-                            0.8 * avgPrice, 
-                            1.2 * avgPrice
-                        );
-                    }
-                    else
-                    {
-                        var avgPrice = list.Average(x => x.LowestSellingPrice);
-                        this.PriceBeliefs.Set(
-                            commodity,
-                            0.8 * avgPrice,
-                            1.2 * avgPrice
-                        );
-                    }
-                }
-            }
-        }
-
-        public virtual void Step()
+        public void Perform()
         {
             this.CostBeliefs.Begin();
 
@@ -73,24 +55,22 @@ namespace Bazaar
             }
 
             this.CostBeliefs.End();
-
-            this.CreateOffers();
         }
 
-        private void CreateOffers()
+        public void SubmitOffers()
         {
-            var money = this.Inventory.Get(Constants.Money);
+            Debug.Assert(this.offers.Count == 0, "Offers list is not empty.");
 
             var offers = this.Behaviors
                 .SelectMany(x => x.GenerateOffers())
                 .Where(x => x != null)
                 .ToList();
 
+            var money = this.Inventory.Get(Constants.Money);
+
             var buyOffers = offers.Where(x => x.Type == OfferType.Buy)
                 .SelectMany(x => x.Split(1))
                 .OrderBy(x => Guid.NewGuid());
-
-            var sellOffers = offers.Where(x => x.Type == OfferType.Sell);
 
             foreach (var offer in buyOffers)
             {
@@ -101,13 +81,28 @@ namespace Bazaar
                     break;
                 }
 
+                this.offers.Add(offer);
                 this.Market.AddOffer(offer);
             }
 
+            var sellOffers = offers.Where(x => x.Type == OfferType.Sell)
+                .SelectMany(x => x.Split(1));
+
             foreach (var offer in sellOffers)
             {
+                this.offers.Add(offer);
                 this.Market.AddOffer(offer);
             }
+        }
+
+        public void HandleOfferResults()
+        {
+            foreach (var offer in this.offers)
+            {
+                this.PriceBeliefs.Update(offer);
+            }
+
+            this.offers.Clear();
         }
 
         public void Consume(string commodity, double amount)
@@ -120,58 +115,6 @@ namespace Bazaar
         {
             this.Inventory.Add(commodity, amount);
             this.CostBeliefs.Produce(commodity, amount);
-        }
-
-        void IOfferPrincipal.AddInventory(string commodity, double amount)
-        {
-            this.Inventory.Add(commodity, amount);
-        }
-
-        void IOfferPrincipal.RemoveInventory(string commodity, double amount)
-        {
-            this.Inventory.Remove(commodity, amount);
-        }
-
-        void IOfferPrincipal.UpdatePriceModel(OfferType type, string commodity, bool success, double price)
-        {
-            var (minPrice, maxPrice) = this.PriceBeliefs.Get(commodity);
-            var money = this.Inventory.Get(Constants.Money);
-
-            var newMinPrice = minPrice;
-            var newMaxPrice = maxPrice;
-
-            if (success)
-            {
-                if (type == OfferType.Buy)
-                {
-                    newMinPrice = 0.5 * minPrice + 0.5 * (0.95 * price);
-                    newMaxPrice = 0.5 * maxPrice + 0.5 * price;
-                }
-                else if (type == OfferType.Sell)
-                {
-                    newMinPrice = 0.5 * minPrice + 0.5 * price;
-                    newMaxPrice = 0.5 * maxPrice + 0.5 * (1.05 * price);
-                }
-            }
-            else
-            {
-                if (type == OfferType.Buy)
-                {
-                    newMinPrice = minPrice;
-                    newMaxPrice = Math.Min(1.05 * maxPrice, money);
-                }
-                else if (type == OfferType.Sell)
-                {
-                    newMinPrice = 0.95 * minPrice;
-                    newMaxPrice = maxPrice;
-                }
-            }
-
-            this.PriceBeliefs.Set(
-                commodity,
-                newMinPrice,
-                newMaxPrice
-            );
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Bazaar.Exchange
     {
 
         private const int HISTORY_LIMIT = 20;
+        private static OfferResult OFFERRESULT_FAILED = new OfferResult(false);
 
         private readonly Random random = new Random();
         private readonly List<Offer> offers = new List<Offer>();
@@ -23,6 +24,8 @@ namespace Bazaar.Exchange
 
         public void ResolveOffers()
         {
+            var amountRemaining = this.offers.ToDictionary(x => x, x => x.Amount);
+
             foreach (var group in this.offers.GroupBy(x => x.Commodity))
             {
                 var commodity = group.Key;
@@ -64,51 +67,55 @@ namespace Bazaar.Exchange
                         break;
                     }
 
-                    var amount = Math.Min(buy.Amount, sell.Amount);
+                    var amount = Math.Min(
+                        amountRemaining[buy],
+                        amountRemaining[sell]
+                    );
+
                     var price = sell.Price + this.random.NextDouble() * (buy.Price - sell.Price);
+                    var result = new OfferResult(true, price);
 
                     if (0 < amount)
                     {
+                        amountRemaining[buy] -= amount;
+                        amountRemaining[sell] -= amount;
 
-                        buy.Amount -= amount;
-                        sell.Amount -= amount;
-
-                        sell.Principal.RemoveInventory(commodity, amount);
-                        buy.Principal.AddInventory(commodity, amount);
+                        sell.Principal.Inventory.Remove(commodity, amount);
+                        buy.Principal.Inventory.Add(commodity, amount);
 
                         var money = amount * price;
-                        buy.Principal.RemoveInventory(Constants.Money, money);
-                        sell.Principal.AddInventory(Constants.Money, money);
+                        buy.Principal.Inventory.Remove(Constants.Money, money);
+                        sell.Principal.Inventory.Add(Constants.Money, money);
 
                         succesfulTrades += 1;
                         moneyTraded += money;
                         amountTraded += amount;
 
-                        buy.Principal.UpdatePriceModel(OfferType.Buy, commodity, true, price);
-                        sell.Principal.UpdatePriceModel(OfferType.Sell, commodity, true, price);
+                        buy.Result = result;
+                        sell.Result = result;
                     }
 
-                    if (buy.Amount == 0)
+                    if (amountRemaining[buy] <= 0)
                     {
-                        buy.Principal.UpdatePriceModel(OfferType.Buy, commodity, true, price);
+                        buy.Result = result;
                         buys.Pop();
                     }
 
-                    if (sell.Amount == 0)
+                    if (amountRemaining[sell] <= 0)
                     {
-                        sell.Principal.UpdatePriceModel(OfferType.Sell, commodity, true, price);
+                        sell.Result = result;
                         sells.Pop();
                     }
                 }
 
                 foreach (var buy in buys)
                 {
-                    buy.Principal.UpdatePriceModel(OfferType.Buy, commodity, false);
+                    buy.Result ??= OFFERRESULT_FAILED;
                 }
 
                 foreach (var sell in sells)
                 {
-                    sell.Principal.UpdatePriceModel(OfferType.Sell, commodity, false);
+                    sell.Result ??= OFFERRESULT_FAILED;
                 }
 
                 var avgPrice = moneyTraded / amountTraded;
@@ -128,8 +135,9 @@ namespace Bazaar.Exchange
                     HighestBuyingPrice = highestBuyingPrice,
                 });
 
-                this.offers.Clear();
             }
+
+            this.offers.Clear();
         }
 
         private void AddHistory(string commodity, MarketHistory history)

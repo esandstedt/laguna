@@ -11,20 +11,27 @@ namespace Bazaar
         public static IEnumerable<Offer> Split(this Offer offer, double splitAmount)
         {
             var amount = offer.Amount;
+
             while (splitAmount < amount)
             {
                 amount -= splitAmount;
 
-                var clone = offer.Clone();
-                clone.Amount = splitAmount;
-                yield return clone;
+                yield return new Offer(
+                    offer.Principal,
+                    offer.Type,
+                    offer.Commodity,
+                    offer.Price,
+                    splitAmount
+                );
             }
 
-            {
-                var clone = offer.Clone();
-                clone.Amount = amount;
-                yield return clone;
-            }
+            yield return new Offer(
+                offer.Principal,
+                offer.Type,
+                offer.Commodity,
+                offer.Price,
+                amount
+            );
         }
     }
 }

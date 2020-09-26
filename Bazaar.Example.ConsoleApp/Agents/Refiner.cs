@@ -8,7 +8,7 @@ namespace Bazaar.Example.ConsoleApp.Agents
 {
     public class Refiner : Agent
     {
-        public Refiner(Town town) : base(town.Market, "refiner")
+        public Refiner(Town town) : base("refiner", town.Market)
         {
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);

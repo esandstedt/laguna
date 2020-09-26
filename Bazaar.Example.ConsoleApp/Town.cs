@@ -3,7 +3,6 @@ using Bazaar.Exchange;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
 namespace Bazaar.Example.ConsoleApp
@@ -12,7 +11,7 @@ namespace Bazaar.Example.ConsoleApp
     {
 
         public Area Area { get; }
-        public List<Agent> Agents { get; } = new List<Agent>();
+        public List<IAgent> Agents { get; } = new List<IAgent>();
         public Market Market { get; } = new Market();
 
         private readonly double maxMoney;
@@ -33,10 +32,16 @@ namespace Bazaar.Example.ConsoleApp
         {
             foreach (var agent in this.Agents)
             {
-                agent.Step();
+                agent.Perform();
+                agent.SubmitOffers();
             }
 
             this.Market.ResolveOffers();
+
+            foreach (var agent in this.Agents)
+            {
+                agent.HandleOfferResults();
+            }
 
             this.ReplaceBankruptAgents();
             this.TaxAgents();

@@ -1,10 +1,6 @@
-﻿using Bazaar.Example.ConsoleApp.Agents;
-using Bazaar.Example.ConsoleApp.Behaviors;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Bazaar.Example.ConsoleApp
 {
@@ -20,11 +16,11 @@ namespace Bazaar.Example.ConsoleApp
                     Production = new Dictionary<string, double>
                     {
                         { Constants.Grain, 0.25 },
-                        { Constants.Fish, 2 },
+                        { Constants.Fish, 4 },
                         { Constants.Apples, 0.01 },
                         { Constants.Oranges, 0.01 },
                         { Constants.Logs, 1 },
-                        { Constants.Ore, 0.5 },
+                        { Constants.Ore, 0 },
                     }
                 }
             );
@@ -36,8 +32,8 @@ namespace Bazaar.Example.ConsoleApp
                     {
                         { Constants.Grain, 4 },
                         { Constants.Fish, 0.05 },
-                        { Constants.Apples, 0.8 },
-                        { Constants.Oranges, 0.2 },
+                        { Constants.Apples, 0.5 },
+                        { Constants.Oranges, 0.25 },
                         { Constants.Logs, 1 },
                         { Constants.Ore, 0.5 },
                     }
