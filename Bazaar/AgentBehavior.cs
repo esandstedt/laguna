@@ -26,13 +26,17 @@ namespace Bazaar
             return new List<Offer>();
         }
 
-        protected Offer Buy(string commodity, double maxAmount)
+        protected Offer Buy(string commodity, double maxAmount, double maxAllowedPrice = double.MaxValue)
         {
             var current = this.Agent.Inventory.Get(commodity);
 
             if (current < maxAmount)
             {
                 var (minPrice, maxPrice) = this.Agent.PriceBeliefs.Get(commodity);
+
+                minPrice = Math.Min(minPrice, maxAllowedPrice);
+                maxPrice = Math.Min(maxPrice, maxAllowedPrice);
+
                 var price = minPrice + this.Random.NextDouble() * (maxPrice - minPrice);
 
                 return new Offer(
@@ -47,13 +51,17 @@ namespace Bazaar
             return null;
         }
 
-        protected Offer Sell(string commodity, double minAmount = 0)
+        protected Offer Sell(string commodity, double minAmount = 0, double minAllowedPrice = 0)
         {
             var current = this.Agent.Inventory.Get(commodity);
 
             if (minAmount < current)
             {
                 var (minPrice, maxPrice) = this.Agent.PriceBeliefs.Get(commodity);
+
+                minPrice = Math.Max(minPrice, minAllowedPrice);
+                maxPrice = Math.Max(maxPrice, minAllowedPrice);
+
                 var price = minPrice + this.Random.NextDouble() * (maxPrice - minPrice);
 
                 return new Offer(
@@ -66,6 +74,18 @@ namespace Bazaar
             }
 
             return null;
+        }
+
+        protected void Consume(string commodity, double amount)
+        {
+            this.Agent.Inventory.Remove(commodity, amount);
+            this.Agent.CostBeliefs.Consume(commodity, amount);
+        }
+
+        protected void Produce(string commodity, double amount)
+        {
+            this.Agent.Inventory.Add(commodity, amount);
+            this.Agent.CostBeliefs.Produce(commodity, amount);
         }
     }
 }

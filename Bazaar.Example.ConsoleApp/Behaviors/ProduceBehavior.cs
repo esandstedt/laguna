@@ -68,17 +68,17 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
                     if (this.Random.NextDouble() < this.options.ToolsBreakChance)
                     {
-                        this.Agent.Consume(Constants.Tools, 1);
+                        this.Consume(Constants.Tools, 1);
                     }
                 }
 
-                this.Agent.Produce(this.options.Commodity, amount);
+                this.Produce(this.options.Commodity, amount);
 
                 this.Agent.CostBeliefs.EndUnit();
             }
             else
             {
-                this.Agent.Consume(Constants.Money, 1);
+                this.Consume(Constants.Money, 1);
             }
         }
 

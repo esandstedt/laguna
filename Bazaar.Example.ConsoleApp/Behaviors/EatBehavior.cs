@@ -47,7 +47,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
                 if (0 < amount)
                 {
-                    this.Agent.Consume(commodity, amount);
+                    this.Consume(commodity, amount);
                     totalNutrition += amount * nutrition;
                 }
             }
@@ -70,7 +70,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
                 if (0 < amount)
                 {
-                    this.Agent.Consume(commodity, amount);
+                    this.Consume(commodity, amount);
                     totalNutrition += amount * nutrition;
                 }
             }
@@ -79,7 +79,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
             if (!this.Eaten)
             {
-                this.Agent.Consume("money", 1);
+                this.Consume(Constants.Money, 1);
             }
         }
 

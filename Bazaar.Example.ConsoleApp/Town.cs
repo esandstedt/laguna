@@ -30,19 +30,6 @@ namespace Bazaar.Example.ConsoleApp
 
         public void Step()
         {
-            foreach (var agent in this.Agents)
-            {
-                agent.Perform();
-                agent.SubmitOffers();
-            }
-
-            this.Market.ResolveOffers();
-
-            foreach (var agent in this.Agents)
-            {
-                agent.HandleOfferResults();
-            }
-
             this.ReplaceBankruptAgents();
             this.TaxAgents();
         }

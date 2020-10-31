@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Bazaar
 {
-    public class Inventory
+    public class Inventory 
     {
 
         private Dictionary<string, double> inventory { get; set; } = new Dictionary<string, double>();
@@ -44,6 +45,5 @@ namespace Bazaar
                 this.inventory[commodity] = 0;
             }
         }
-
     }
 }

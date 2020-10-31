@@ -16,11 +16,11 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
             var chance = this.Random.NextDouble();
             if (chance < 0.1)
             {
-                this.Agent.Consume(Constants.Planks, 1);
+                this.Consume(Constants.Planks, 1);
             }
             else if (chance < 0.2)
             {
-                this.Agent.Consume(Constants.Planks, 0.5);
+                this.Consume(Constants.Planks, 0.5);
             }
         }
 

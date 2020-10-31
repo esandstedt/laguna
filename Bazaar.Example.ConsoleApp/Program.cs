@@ -10,48 +10,50 @@ namespace Bazaar.Example.ConsoleApp
         {
             var world = new World();
 
-            var first = world.AddTown(
+            var townA = world.AddTown(
                 new Area
                 {
                     Production = new Dictionary<string, double>
                     {
-                        { Constants.Grain, 0.25 },
+                        { Constants.Grain, 0.125 },
                         { Constants.Fish, 4 },
                         { Constants.Apples, 0.01 },
                         { Constants.Oranges, 0.01 },
-                        { Constants.Logs, 1 },
-                        { Constants.Ore, 0 },
-                    }
-                }
-            );
-
-            var second = world.AddTown(
-                new Area
-                {
-                    Production = new Dictionary<string, double>
-                    {
-                        { Constants.Grain, 4 },
-                        { Constants.Fish, 0.05 },
-                        { Constants.Apples, 0.5 },
-                        { Constants.Oranges, 0.25 },
                         { Constants.Logs, 1 },
                         { Constants.Ore, 0.5 },
                     }
                 }
             );
 
+            var townB = world.AddTown(
+                new Area
+                {
+                    Production = new Dictionary<string, double>
+                    {
+                        { Constants.Grain, 4 },
+                        { Constants.Fish, 0.05 },
+                        { Constants.Apples, 0.25 },
+                        { Constants.Oranges, 0.125 },
+                        { Constants.Logs, 1 },
+                        { Constants.Ore, 0.5 },
+                    }
+                }
+            );
+
+            var routeAB = world.AddRoute(townA, townB);
+
             for (var i = 0; i < 2000; i++)
             {
                 world.Step();
 
-                var firstBread = first.Market.GetHistory(Constants.Bread).FirstOrDefault();
-                var firstFish = first.Market.GetHistory(Constants.Fish).FirstOrDefault();
-                var firstApples = first.Market.GetHistory(Constants.Apples).FirstOrDefault();
-                var firstOranges = first.Market.GetHistory(Constants.Oranges).FirstOrDefault();
-                var secondBread = second.Market.GetHistory(Constants.Bread).FirstOrDefault();
-                var secondFish = second.Market.GetHistory(Constants.Fish).FirstOrDefault();
-                var secondApples = second.Market.GetHistory(Constants.Apples).FirstOrDefault();
-                var secondOranges = second.Market.GetHistory(Constants.Oranges).FirstOrDefault();
+                var firstBread = townA.Market.GetHistory(Constants.Bread).FirstOrDefault();
+                var firstFish = townA.Market.GetHistory(Constants.Fish).FirstOrDefault();
+                var firstApples = townA.Market.GetHistory(Constants.Apples).FirstOrDefault();
+                var firstOranges = townA.Market.GetHistory(Constants.Oranges).FirstOrDefault();
+                var secondBread = townB.Market.GetHistory(Constants.Bread).FirstOrDefault();
+                var secondFish = townB.Market.GetHistory(Constants.Fish).FirstOrDefault();
+                var secondApples = townB.Market.GetHistory(Constants.Apples).FirstOrDefault();
+                var secondOranges = townB.Market.GetHistory(Constants.Oranges).FirstOrDefault();
 
                 Console.WriteLine(
                     "{0,5} || {1,4} {2,6:F2} | {3,4} {4,6:F2} | {5,4} {6,6:F2} {7,4} {8,6:F2} || {9,4} {10,6:F2} | {11,4} {12,6:F2} | {13,4} {14,6:F2} | {15,4} {16,6:F2}", 
@@ -76,7 +78,7 @@ namespace Bazaar.Example.ConsoleApp
             }
 
             {
-                var firstAgentCounts = first.Agents
+                var firstAgentCounts = townA.Agents
                     .GroupBy(x => x.Type)
                     .Select(x => new
                     {
@@ -85,7 +87,7 @@ namespace Bazaar.Example.ConsoleApp
                     })
                     .ToList();
 
-                var secondAgentCounts = second.Agents
+                var secondAgentCounts = townB.Agents
                     .GroupBy(x => x.Type)
                     .Select(x => new
                     {

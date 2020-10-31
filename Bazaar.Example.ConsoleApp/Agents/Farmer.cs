@@ -44,12 +44,12 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 {
                     this.Agent.CostBeliefs.BeginUnit();
 
-                    this.Agent.Produce(Constants.Grain, 3 * baseAmount);
-                    this.Agent.Consume(Constants.Planks, 0.25);
+                    this.Produce(Constants.Grain, 3 * baseAmount);
+                    this.Consume(Constants.Planks, 0.25);
 
                     if (this.Random.NextDouble() < 0.1)
                     {
-                        this.Agent.Consume(Constants.Tools, 1);
+                        this.Consume(Constants.Tools, 1);
                     }
 
                     this.Agent.CostBeliefs.EndUnit();
@@ -58,19 +58,19 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 {
                     this.Agent.CostBeliefs.BeginUnit();
 
-                    this.Agent.Produce(Constants.Grain, baseAmount);
-                    this.Agent.Consume(Constants.Planks, 0.5);
+                    this.Produce(Constants.Grain, baseAmount);
+                    this.Consume(Constants.Planks, 0.5);
 
                     this.Agent.CostBeliefs.EndUnit();
                 }
                 else
                 {
-                    this.Agent.Consume(Constants.Money, 1);
+                    this.Consume(Constants.Money, 1);
                 }
             }
             else
             {
-                this.Agent.Consume(Constants.Money, 1);
+                this.Consume(Constants.Money, 1);
             }
         }
 

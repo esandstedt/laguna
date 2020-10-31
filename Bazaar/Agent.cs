@@ -105,16 +105,5 @@ namespace Bazaar
             this.offers.Clear();
         }
 
-        public void Consume(string commodity, double amount)
-        {
-            this.Inventory.Remove(commodity, amount);
-            this.CostBeliefs.Consume(commodity, amount);
-        }
-
-        public void Produce(string commodity, double amount)
-        {
-            this.Inventory.Add(commodity, amount);
-            this.CostBeliefs.Produce(commodity, amount);
-        }
     }
 }

@@ -45,19 +45,19 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 var amount = Math.Min(ore, eaten ? 4 : 2);
                 var factor = hasTools ? 0.5 : 0.25;
 
-                this.Agent.Consume(Constants.Ore, amount);
-                this.Agent.Produce(Constants.Metal, factor * amount);
+                this.Consume(Constants.Ore, amount);
+                this.Produce(Constants.Metal, factor * amount);
 
                 if (hasTools && this.Random.NextDouble() < 0.1)
                 {
-                    this.Agent.Consume(Constants.Tools, 1);
+                    this.Consume(Constants.Tools, 1);
                 }
 
                 this.Agent.CostBeliefs.EndUnit();
             }
             else
             {
-                this.Agent.Consume(Constants.Money, 1);
+                this.Consume(Constants.Money, 1);
             }
         }
 
