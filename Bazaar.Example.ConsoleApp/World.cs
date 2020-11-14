@@ -18,7 +18,7 @@ namespace Bazaar.Example.ConsoleApp
         public List<Route> Routes { get; } = new List<Route>();
 
         private IEnumerable<IAgent> Agents => this.Towns.SelectMany(x => x.Agents).Concat(this.Routes.SelectMany(x => x.Agents));
-        private IEnumerable<Market> Markets => this.Towns.Select(x => x.Market);
+        private IEnumerable<IMarket> Markets => this.Towns.Select(x => x.Market);
 
         public Town AddTown(Area area)
         {

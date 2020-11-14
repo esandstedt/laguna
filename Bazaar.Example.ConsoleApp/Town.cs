@@ -12,7 +12,7 @@ namespace Bazaar.Example.ConsoleApp
 
         public Area Area { get; }
         public List<IAgent> Agents { get; } = new List<IAgent>();
-        public Market Market { get; } = new Market();
+        public IMarket Market { get; } = new Market();
 
         private readonly double maxMoney;
 

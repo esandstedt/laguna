@@ -5,13 +5,20 @@ using System.Linq;
 
 namespace Bazaar.Exchange
 {
-    public class Market
+    public interface IMarket
+    {
+        void AddOffer(Offer offer);
+        void ResolveOffers();
+
+        IEnumerable<MarketHistory> GetHistory(string commodity);
+        IEnumerable<string> GetCommodities();
+    }
+
+    public class Market : IMarket
     {
 
         private const int HISTORY_LIMIT = 20;
-        private static OfferResult OFFERRESULT_FAILED = new OfferResult(false);
 
-        private readonly Random random = new Random();
         private readonly List<Offer> offers = new List<Offer>();
         private readonly Dictionary<string, List<MarketHistory>> history = new Dictionary<string, List<MarketHistory>>();
 
@@ -72,50 +79,31 @@ namespace Bazaar.Exchange
                         amountRemaining[sell]
                     );
 
-                    var price = sell.Price + this.random.NextDouble() * (buy.Price - sell.Price);
-                    var result = new OfferResult(true, price);
+                    var price = sell.Price + (buy.Price - sell.Price) / 2;
+                    var result = new OfferResult(amount, price);
+
+                    buy.Results.Add(result);
+                    sell.Results.Add(result);
 
                     if (0 < amount)
                     {
                         amountRemaining[buy] -= amount;
                         amountRemaining[sell] -= amount;
 
-                        sell.Principal.Inventory.Remove(commodity, amount);
-                        buy.Principal.Inventory.Add(commodity, amount);
-
-                        var money = amount * price;
-                        buy.Principal.Inventory.Remove(Constants.Money, money);
-                        sell.Principal.Inventory.Add(Constants.Money, money);
-
                         succesfulTrades += 1;
-                        moneyTraded += money;
+                        moneyTraded += amount * price;
                         amountTraded += amount;
-
-                        buy.Result = result;
-                        sell.Result = result;
                     }
 
                     if (amountRemaining[buy] <= 0)
                     {
-                        buy.Result = result;
                         buys.Pop();
                     }
 
                     if (amountRemaining[sell] <= 0)
                     {
-                        sell.Result = result;
                         sells.Pop();
                     }
-                }
-
-                foreach (var buy in buys)
-                {
-                    buy.Result ??= OFFERRESULT_FAILED;
-                }
-
-                foreach (var sell in sells)
-                {
-                    sell.Result ??= OFFERRESULT_FAILED;
                 }
 
                 var avgPrice = moneyTraded / amountTraded;
@@ -157,14 +145,14 @@ namespace Bazaar.Exchange
             }
         }
 
-        public List<MarketHistory> GetHistory(string commodity)
+        public IEnumerable<MarketHistory> GetHistory(string commodity)
         {
             return this.history.GetValueOrDefault(commodity, new List<MarketHistory>());
         }
 
-        public List<string> GetCommodities()
+        public IEnumerable<string> GetCommodities()
         {
-            return this.history.Keys.ToList();
+            return this.history.Keys;
         }
     }
 }

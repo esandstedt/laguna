@@ -17,7 +17,6 @@ namespace Bazaar
                 amount -= splitAmount;
 
                 yield return new Offer(
-                    offer.Principal,
                     offer.Type,
                     offer.Commodity,
                     offer.Price,
@@ -26,7 +25,6 @@ namespace Bazaar
             }
 
             yield return new Offer(
-                offer.Principal,
                 offer.Type,
                 offer.Commodity,
                 offer.Price,

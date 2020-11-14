@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bazaar", "Bazaar\Bazaar.csproj", "{65CD5BFD-27D5-4C82-A6C0-19587C66D897}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bazaar", "Bazaar\Bazaar.csproj", "{65CD5BFD-27D5-4C82-A6C0-19587C66D897}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bazaar.Example.ConsoleApp", "Bazaar.Example.ConsoleApp\Bazaar.Example.ConsoleApp.csproj", "{35F97A00-B990-4205-9A58-7AE0A03B206D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bazaar.Example.ConsoleApp", "Bazaar.Example.ConsoleApp\Bazaar.Example.ConsoleApp.csproj", "{35F97A00-B990-4205-9A58-7AE0A03B206D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

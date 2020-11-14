@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bazaar.Exchange;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,17 +10,15 @@ namespace Bazaar
     {
 
         private readonly PriceBeliefs priceBeliefs;
-        private readonly double minimumPrice;
 
         private Unit baseUnit;
         private Unit currentUnit;
         private readonly List<Unit> units;
         private readonly Dictionary<string, List<(double, double)>> unitCosts;
 
-        public CostBeliefs(PriceBeliefs priceBeliefs, double minimumPrice)
+        public CostBeliefs(PriceBeliefs priceBeliefs)
         {
             this.priceBeliefs = priceBeliefs;
-            this.minimumPrice = minimumPrice;
 
             this.baseUnit = new Unit();
             this.units = new List<Unit>();
@@ -89,7 +88,7 @@ namespace Bazaar
                         );
                     }
 
-                    if (0 < minUnitCost && minUnitCost < this.minimumPrice)
+                    if (0 < minUnitCost && minUnitCost < PriceBeliefs.MinValue)
                     {
                         foreach (var commodity in consumes.Keys.Where(x => x != Constants.Money))
                         {
@@ -97,8 +96,8 @@ namespace Bazaar
 
                             this.priceBeliefs.Set(
                                 commodity,
-                                this.minimumPrice * minPrice / minUnitCost,
-                                this.minimumPrice * maxPrice / minUnitCost
+                                PriceBeliefs.MinValue * minPrice / minUnitCost,
+                                PriceBeliefs.MinValue * maxPrice / minUnitCost
                             );
                         }
                     }

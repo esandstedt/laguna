@@ -40,7 +40,6 @@ namespace Bazaar
                 var price = minPrice + this.Random.NextDouble() * (maxPrice - minPrice);
 
                 return new Offer(
-                    this.Agent,
                     OfferType.Buy,
                     commodity,
                     price,
@@ -65,7 +64,6 @@ namespace Bazaar
                 var price = minPrice + this.Random.NextDouble() * (maxPrice - minPrice);
 
                 return new Offer(
-                    this.Agent,
                     OfferType.Sell,
                     commodity,
                     price,

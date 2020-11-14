@@ -16,29 +16,25 @@ namespace Bazaar
         void HandleOfferResults();
     }
 
-    public abstract class Agent : IOfferPrincipal, IAgent
+    public abstract class Agent : IAgent
     {
-
-        private static readonly double MINIMUM_PRICE = 1;
-        private static readonly double MAXIMUM_PRICE = 100;
-
         public string Type { get; }
         public List<AgentBehavior> Behaviors { get; }
-        public Market Market { get; }
+        public IMarket Market { get; }
         public Inventory Inventory { get; } 
         public PriceBeliefs PriceBeliefs { get; }
         public CostBeliefs CostBeliefs { get; }
 
         private readonly List<Offer> offers; 
 
-        public Agent(string type, Market market)
+        public Agent(string type, IMarket market)
         {
             this.Type = type;
             this.Market = market;
             this.Behaviors = new List<AgentBehavior>();
             this.Inventory = new Inventory();
-            this.PriceBeliefs = new PriceBeliefs(MINIMUM_PRICE, MAXIMUM_PRICE);
-            this.CostBeliefs = new CostBeliefs(this.PriceBeliefs, MINIMUM_PRICE);
+            this.PriceBeliefs = new PriceBeliefs();
+            this.CostBeliefs = new CostBeliefs(this.PriceBeliefs);
 
             this.offers = new List<Offer>();
 
@@ -85,8 +81,7 @@ namespace Bazaar
                 this.Market.AddOffer(offer);
             }
 
-            var sellOffers = offers.Where(x => x.Type == OfferType.Sell)
-                .SelectMany(x => x.Split(1));
+            var sellOffers = offers.Where(x => x.Type == OfferType.Sell);
 
             foreach (var offer in sellOffers)
             {
@@ -99,6 +94,20 @@ namespace Bazaar
         {
             foreach (var offer in this.offers)
             {
+                var amount = offer.Results.Sum(x => x.Amount);
+                var money = offer.Results.Sum(x => x.Amount * x.Price);
+
+                if (offer.Type == OfferType.Buy)
+                {
+                    this.Inventory.Add(offer.Commodity, amount);
+                    this.Inventory.Remove(Constants.Money, money);
+                }
+                else if (offer.Type == OfferType.Sell)
+                {
+                    this.Inventory.Add(Constants.Money, money);
+                    this.Inventory.Remove(offer.Commodity, amount);
+                }
+
                 this.PriceBeliefs.Update(offer);
             }
 

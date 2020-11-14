@@ -8,22 +8,16 @@ namespace Bazaar
 {
     public class PriceBeliefs
     {
-        private readonly double minimum;
-        private readonly double maximum;
+        public const double MinValue = 1;
+        public const double MaxValue = 100;
 
         private readonly Dictionary<string, (double, double)> priceBeliefs = new Dictionary<string, (double, double)>();
 
-        public PriceBeliefs(double minimum, double maximum)
-        {
-            this.minimum = minimum;
-            this.maximum = maximum;
-        }
-
-        public void Initialize(Market market)
+        public void Initialize(IMarket market)
         {
             foreach (var commodity in market.GetCommodities())
             {
-                IList<MarketHistory> history = market.GetHistory(commodity);
+                IList<MarketHistory> history = market.GetHistory(commodity).ToList();
                 if (history.Any())
                 {
                     var list = history.Take(10).ToList();
@@ -54,24 +48,26 @@ namespace Bazaar
         public void Update(Offer offer)
         {
             if (offer == null) throw new ArgumentNullException(nameof(offer));
-            if (offer.Result == null) throw new ArgumentException("Offer does not have a result");
 
             var (minPrice, maxPrice) = this.Get(offer.Commodity);
 
             var newMinPrice = minPrice;
             var newMaxPrice = maxPrice;
 
-            if (offer.Result.Success)
+            if (offer.Results.Any())
             {
+                var amount = offer.Results.Sum(x => x.Amount);
+                var price = offer.Results.Sum(x => x.Price * x.Amount / amount);
+
                 if (offer.Type == OfferType.Buy)
                 {
-                    newMinPrice = 0.5 * minPrice + 0.5 * (0.95 * offer.Result.Price);
-                    newMaxPrice = 0.5 * maxPrice + 0.5 * offer.Result.Price;
+                    newMinPrice = 0.5 * minPrice + 0.5 * (0.95 * price);
+                    newMaxPrice = 0.5 * maxPrice + 0.5 * price;
                 }
                 else if (offer.Type == OfferType.Sell)
                 {
-                    newMinPrice = 0.5 * minPrice + 0.5 * offer.Result.Price;
-                    newMaxPrice = 0.5 * maxPrice + 0.5 * (1.05 * offer.Result.Price);
+                    newMinPrice = 0.5 * minPrice + 0.5 * price;
+                    newMaxPrice = 0.5 * maxPrice + 0.5 * (1.05 * price);
                 }
             }
             else
@@ -116,8 +112,8 @@ namespace Bazaar
             }
 
             this.priceBeliefs[commodity] = (
-                Math.Min(Math.Max(this.minimum, minPrice), this.maximum),
-                Math.Min(Math.Max(this.minimum, maxPrice), this.maximum)
+                Math.Min(Math.Max(@MinValue, minPrice), @MaxValue),
+                Math.Min(Math.Max(@MinValue, maxPrice), @MaxValue)
             );
         }
 
