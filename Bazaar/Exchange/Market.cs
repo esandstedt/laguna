@@ -47,7 +47,6 @@ namespace Bazaar.Exchange
                 var sells = new Stack<Offer>(
                     group
                         .Where(x => x.Type == OfferType.Sell)
-                        .Where(x => 0 < x.Amount)
                         .OrderByDescending(x => x.Price)
                         .ToList()
                 );

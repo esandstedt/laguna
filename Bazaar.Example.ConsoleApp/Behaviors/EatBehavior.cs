@@ -89,8 +89,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
                 .Select(pair =>
                 {
                     var (commodity, nutrition) = (pair.Key, pair.Value);
-                    var belief = this.Agent.PriceBeliefs.Get(commodity);
-                    var price = belief.Item2;
+                    var price = this.Agent.PriceBeliefs.Get(commodity).Item2;
                     return new
                     {
                         Commodity = commodity,
@@ -109,13 +108,17 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
             {
                 var (commodity, percent) = (pair.Key, pair.Value);
 
-                double amount = 0;
                 if (FAVORABILITY_THRESHOLD < percent)
                 {
-                    amount = 2 * percent * NUTRITION_DAILY / COMMODITY_NUTRITION[commodity];
+                    yield return this.Buy(
+                        commodity,
+                        2 * percent * NUTRITION_DAILY / COMMODITY_NUTRITION[commodity]
+                    );
                 }
-
-                yield return this.Buy(commodity, amount);
+                else 
+                {
+                    yield return this.Buy(commodity, 0);
+                }
             }
         }
     }

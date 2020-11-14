@@ -12,7 +12,7 @@ namespace Bazaar.Example.ConsoleApp.Agents
         {
             var eat = new EatBehavior(this);
             this.Behaviors.Add(eat);
-            this.Behaviors.Add(new MillerBehavior(this, eat));
+            this.Behaviors.Add(new MillerBehavior(this, town.Area, eat));
             this.Behaviors.Add(new WorkerBehavior(this));
 
             this.Inventory.Add(Constants.Money, 100);
@@ -23,10 +23,12 @@ namespace Bazaar.Example.ConsoleApp.Agents
     {
 
         private readonly EatBehavior eat;
+        private readonly double ratio;
 
-        public MillerBehavior(Agent agent, EatBehavior eat) : base(agent)
+        public MillerBehavior(Agent agent, Area area, EatBehavior eat) : base(agent)
         {
             this.eat = eat;
+            this.ratio = area.Production[Constants.Flour];
         }
 
         public override void Perform()
@@ -42,11 +44,11 @@ namespace Bazaar.Example.ConsoleApp.Agents
                 var hasTools = 0 < tools;
                 var eaten = this.eat.Eaten;
 
-                var amount = Math.Min(grain, eaten ? 4 : 2);
+                var amount = Math.Min(grain, eaten ? 2 : 1);
                 var factor = hasTools ? 0.75 : 0.5;
 
                 this.Consume(Constants.Grain, amount);
-                this.Produce(Constants.Flour, factor * amount);
+                this.Produce(Constants.Flour, this.ratio * factor * amount);
 
                 if (hasTools && this.Random.NextDouble() < 0.1)
                 {

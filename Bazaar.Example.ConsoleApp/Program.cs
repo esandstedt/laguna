@@ -10,50 +10,124 @@ namespace Bazaar.Example.ConsoleApp
         {
             var world = new World();
 
-            var townA = world.AddTown(
+            var gefion = world.AddTown(
+                "Gefion",
                 new Area
                 {
                     Production = new Dictionary<string, double>
                     {
-                        { Constants.Grain, 0.125 },
-                        { Constants.Fish, 4 },
-                        { Constants.Apples, 0.01 },
-                        { Constants.Oranges, 0.01 },
-                        { Constants.Logs, 1 },
-                        { Constants.Ore, 0.5 },
-                    }
-                }
-            );
-
-            var townB = world.AddTown(
-                new Area
-                {
-                    Production = new Dictionary<string, double>
-                    {
-                        { Constants.Grain, 4 },
-                        { Constants.Fish, 0.05 },
+                        { Constants.Grain, 0.5 },
+                        { Constants.Fish, 0.5 },
                         { Constants.Apples, 0.25 },
-                        { Constants.Oranges, 0.125 },
-                        { Constants.Logs, 1 },
+                        { Constants.Oranges, 0.25 },
+                        { Constants.Logs, 0 },
                         { Constants.Ore, 0.5 },
+
+                        { Constants.Flour, 1 },
+                        { Constants.Bread, 1 },
                     }
-                }
+                },
+                500
             );
 
-            var routeAB = world.AddRoute(townA, townB);
+            var gnomeran = world.AddTown(
+                "Gnomeran",
+                new Area
+                {
+                    Production = new Dictionary<string, double>
+                    {
+                        { Constants.Grain, 0.5 },
+                        { Constants.Fish, 0.5 },
+                        { Constants.Apples, 0.5 },
+                        { Constants.Oranges, 0.5 },
+                        { Constants.Logs, 0 },
+                        { Constants.Ore, 0 },
+
+                        { Constants.Flour, 2 },
+                        { Constants.Bread, 1 },
+                    }
+                },
+                250
+            );
+
+            var thrane = world.AddTown(
+                "Thrane",
+                new Area
+                {
+                    Production = new Dictionary<string, double>
+                    {
+                        { Constants.Grain, 0 },
+                        { Constants.Fish, 0 },
+                        { Constants.Apples, 0 },
+                        { Constants.Oranges, 0 },
+                        { Constants.Logs, 0.5 },
+                        { Constants.Ore, 1.5 },
+
+                        { Constants.Flour, 0.25 },
+                        { Constants.Bread, 1 },
+                    }
+                },
+                1000
+            );
+
+            var unther = world.AddTown(
+                "Unther",
+                new Area
+                {
+                    Production = new Dictionary<string, double>
+                    {
+                        { Constants.Grain, 0 },
+                        { Constants.Fish, 0.5 },
+                        { Constants.Apples, 0 },
+                        { Constants.Oranges, 0 },
+                        { Constants.Logs, 1 },
+                        { Constants.Ore, 0.5 },
+
+                        { Constants.Flour, 0.25 },
+                        { Constants.Bread, 1 },
+                    }
+                },
+                250
+            );
+
+            var tolm = world.AddTown(
+                "Tolm",
+                new Area
+                {
+                    Production = new Dictionary<string, double>
+                    {
+                        { Constants.Grain, 0.25 },
+                        { Constants.Fish, 0.75 },
+                        { Constants.Apples, 0 },
+                        { Constants.Oranges, 0 },
+                        { Constants.Logs, 0.25 },
+                        { Constants.Ore, 0.75 },
+
+                        { Constants.Flour, 0.25 },
+                        { Constants.Bread, 1 },
+                    }
+                },
+                250
+            );
+
+            var gefionGnomeranRoute = world.AddRoute(gefion, gnomeran, 25);
+            var gefionThraneRoute = world.AddRoute(gefion, thrane, 50);
+            var gnomeranThraneRoute = world.AddRoute(gnomeran, thrane, 25);
+            var thraneUntherRoute = world.AddRoute(thrane, unther, 25);
+            var untherTolmRoute = world.AddRoute(unther, tolm, 25);
 
             for (var i = 0; i < 2000; i++)
             {
                 world.Step();
 
-                var firstBread = townA.Market.GetHistory(Constants.Bread).FirstOrDefault();
-                var firstFish = townA.Market.GetHistory(Constants.Fish).FirstOrDefault();
-                var firstApples = townA.Market.GetHistory(Constants.Apples).FirstOrDefault();
-                var firstOranges = townA.Market.GetHistory(Constants.Oranges).FirstOrDefault();
-                var secondBread = townB.Market.GetHistory(Constants.Bread).FirstOrDefault();
-                var secondFish = townB.Market.GetHistory(Constants.Fish).FirstOrDefault();
-                var secondApples = townB.Market.GetHistory(Constants.Apples).FirstOrDefault();
-                var secondOranges = townB.Market.GetHistory(Constants.Oranges).FirstOrDefault();
+                var firstBread = gefion.Market.GetHistory(Constants.Bread).FirstOrDefault();
+                var firstFish = gefion.Market.GetHistory(Constants.Fish).FirstOrDefault();
+                var firstApples = gefion.Market.GetHistory(Constants.Apples).FirstOrDefault();
+                var firstOranges = gefion.Market.GetHistory(Constants.Oranges).FirstOrDefault();
+                var secondBread = tolm.Market.GetHistory(Constants.Bread).FirstOrDefault();
+                var secondFish = tolm.Market.GetHistory(Constants.Fish).FirstOrDefault();
+                var secondApples = tolm.Market.GetHistory(Constants.Apples).FirstOrDefault();
+                var secondOranges = tolm.Market.GetHistory(Constants.Oranges).FirstOrDefault();
 
                 Console.WriteLine(
                     "{0,5} || {1,4} {2,6:F2} | {3,4} {4,6:F2} | {5,4} {6,6:F2} {7,4} {8,6:F2} || {9,4} {10,6:F2} | {11,4} {12,6:F2} | {13,4} {14,6:F2} | {15,4} {16,6:F2}", 
@@ -78,7 +152,7 @@ namespace Bazaar.Example.ConsoleApp
             }
 
             {
-                var firstAgentCounts = townA.Agents
+                var gefionAgentCounts = gefion.Agents
                     .GroupBy(x => x.Type)
                     .Select(x => new
                     {
@@ -87,7 +161,16 @@ namespace Bazaar.Example.ConsoleApp
                     })
                     .ToList();
 
-                var secondAgentCounts = townB.Agents
+                var gnomeranAgentCounts = gnomeran.Agents
+                    .GroupBy(x => x.Type)
+                    .Select(x => new
+                    {
+                        Type = x.Key,
+                        Count = x.Count()
+                    })
+                    .ToList();
+
+                var thraneAgentCounts = thrane.Agents
                     .GroupBy(x => x.Type)
                     .Select(x => new
                     {

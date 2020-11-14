@@ -21,5 +21,20 @@ namespace Bazaar.Example.ConsoleApp
         public const string Ore = "ore";
         public const string Metal = "metal";
         public const string Tools = "tools";
+
+        public readonly static List<string> TradableCommodities = new List<string>
+        {
+            Grain,
+            Flour,
+            Bread,
+            Fish,
+            Apples,
+            Oranges,
+            //Logs,
+            Planks,
+            //Ore,
+            Metal,
+            Tools
+        };
     }
 }

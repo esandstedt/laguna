@@ -10,7 +10,6 @@ namespace Bazaar
     public interface IAgent
     {
         string Type { get; }
-        Inventory Inventory { get; }
         void Perform();
         void SubmitOffers();
         void HandleOfferResults();

@@ -15,7 +15,7 @@ namespace Bazaar.Example.ConsoleApp.Agents
             this.Behaviors.Add(new ProduceBehavior(
                 this,
                 eat,
-                new AreaProduceBehaviorOptions(town.Area, Constants.Apples)
+                new AreaProduceBehaviorOptions(this, town, Constants.Apples)
                 {
                     EatFactor = 2,
                     ToolsFactor = 2,
@@ -25,7 +25,7 @@ namespace Bazaar.Example.ConsoleApp.Agents
             this.Behaviors.Add(new ProduceBehavior(
                 this,
                 eat,
-                new AreaProduceBehaviorOptions(town.Area, Constants.Oranges)
+                new AreaProduceBehaviorOptions(this, town, Constants.Oranges)
                 {
                     EatFactor = 2,
                     ToolsFactor = 2,

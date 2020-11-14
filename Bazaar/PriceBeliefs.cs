@@ -11,6 +11,7 @@ namespace Bazaar
         public const double MinValue = 1;
         public const double MaxValue = 100;
 
+        private readonly Random random = new Random();
         private readonly Dictionary<string, (double, double)> priceBeliefs = new Dictionary<string, (double, double)>();
 
         public void Initialize(IMarket market)
@@ -56,8 +57,16 @@ namespace Bazaar
 
             if (offer.Results.Any())
             {
+                double price;
                 var amount = offer.Results.Sum(x => x.Amount);
-                var price = offer.Results.Sum(x => x.Price * x.Amount / amount);
+                if (amount != 0)
+                {
+                    price = offer.Results.Sum(x => x.Price * x.Amount / amount);
+                }
+                else
+                {
+                    price = offer.Results.Average(x => x.Price);
+                }
 
                 if (offer.Type == OfferType.Buy)
                 {
@@ -90,6 +99,18 @@ namespace Bazaar
                 newMaxPrice
             );
 
+        }
+
+        public double GetRandom(string commodity)
+        {
+            var (minPrice, maxPrice) = this.Get(commodity);
+            return minPrice + this.random.NextDouble() * (maxPrice - minPrice);
+        }
+
+        public double GetAverage(string commodity)
+        {
+            var (minPrice, maxPrice) = this.Get(commodity);
+            return (minPrice + maxPrice) / 2.0;
         }
 
         public (double, double) Get(string commodity)

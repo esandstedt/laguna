@@ -1,6 +1,7 @@
 ﻿using Bazaar.Exchange;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -8,18 +9,11 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 {
     public class AreaProduceBehaviorOptions : ProduceBehaviorOptions
     {
-        private readonly Area area;
-
-        public AreaProduceBehaviorOptions(Area area, string commodity)
+        public AreaProduceBehaviorOptions(Agent agent, Town town, string commodity)
         {
-            this.area = area;
+            var count = town.Agents.Count(x => x.Type == agent.Type);
+            this.BaseAmount = Math.Pow(0.99, count) * town.Area.Production[commodity];
             this.Commodity = commodity;
-        }
-
-        public override double BaseAmount 
-        {
-            get => this.area.Production[this.Commodity];
-            set => throw new InvalidOperationException();
         }
     }
 
