@@ -1,4 +1,4 @@
-﻿using Bazaar.Exchange;
+﻿using Laguna.Market;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,16 +8,16 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 {
     public class EatBehavior : AgentBehavior
     {
-        private static readonly double NUTRITION_DAILY = 1.25;
-        private static readonly double NUTRITION_EATEN = 1.0;
+        private static readonly double NUTRITION_DAILY = 4;
+        private static readonly double NUTRITION_EATEN = 3;
         private static readonly double FAVORABILITY_THRESHOLD = 0.1;
 
         private static readonly Dictionary<string, double> COMMODITY_NUTRITION = new Dictionary<string, double>
         {
-            { Constants.Bread, 1.25 },
-            { Constants.Fish, 0.75 },
-            { Constants.Apples, 0.5 },
-            { Constants.Oranges, 0.5 },
+            { Constants.Bread, 4 },
+            { Constants.Fish, 2 },
+            { Constants.Apples, 1 },
+            { Constants.Oranges, 1},
         };
 
         public bool Eaten { get; private set; }
@@ -79,7 +79,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
             if (!this.Eaten)
             {
-                this.Consume(Constants.Money, 1);
+                //this.Consume(Constants.Money, 1);
             }
         }
 

@@ -1,5 +1,5 @@
 ﻿using Bazaar.Example.ConsoleApp.Agents;
-using Bazaar.Exchange;
+using Laguna.Market;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,50 +11,35 @@ namespace Bazaar.Example.ConsoleApp
     {
 
         public string Name { get; }
-        public Area Area { get; }
         public List<Agent> Agents { get; } = new List<Agent>();
-        public IMarket Market { get; } = new Market();
+        public IMarket Market { get; } = new MarketImpl();
 
-        private readonly double maxMoney;
+        public double Money { get; set; }
+
+        private readonly Area area;
         private readonly Random random = new Random();
 
-        public Town(string name, Area area, int agentCount, double maxMoney)
+        public Town(string name, Area area, int agentCount)
         {
             this.Name = name;
-            this.Area = area;
-            this.maxMoney = maxMoney;
+            this.area = area;
+
+            this.Money = 100 * agentCount;
 
             this.AddAgents(agentCount);
         }
 
+        public double GetRatio(string commodity)
+        {
+            return this.area.Capacity[commodity];
+        }
+
         public void Step()
         {
-            this.ReplaceBankruptAgents();
             this.TaxAgents();
+            this.ReplaceBankruptAgents();
+            this.AddAgents(10);
         }
-
-        /*
-        private void AddRandomAgent()
-        {
-            var agent = new List<Func<Agent>>
-            {
-                () => new Farmer(this),
-                () => new Miller(this),
-                () => new Baker(this),
-                () => new Fisherman(this),
-                () => new Orchardist(this),
-                () => new Lumberjack(this),
-                () => new Sawyer(this),
-                () => new Miner(this),
-                () => new Refiner(this),
-                () => new Blacksmith(this),
-            }
-                .Random()
-                .Invoke();
-
-            this.Agents.Add(agent);
-        }
-         */
 
         private void ReplaceBankruptAgents()
         {
@@ -65,6 +50,7 @@ namespace Bazaar.Example.ConsoleApp
             foreach (var agent in agentsToRemove)
             {
                 this.Agents.Remove(agent);
+                this.Money += agent.Inventory.Get(Constants.Money);
             }
 
             this.AddAgents(agentsToRemove.Count);
@@ -101,6 +87,11 @@ namespace Bazaar.Example.ConsoleApp
 
             for (var i = 0; i < amount; i++)
             {
+                if (this.Money < 100)
+                {
+                    break;
+                }
+
                 var weight = this.random.NextDouble() * totalWeight;
                 var j = 0;
                 for (; weights[j].Value < weight; j++)
@@ -140,23 +131,26 @@ namespace Bazaar.Example.ConsoleApp
                     case "blacksmith":
                         this.Agents.Add(new Blacksmith(this));
                         break;
+                    default:
+                        throw new InvalidOperationException();
                 }
+
+                this.Money -= 100;
             }
         }
 
         private void TaxAgents()
         {
-            var totalMoney = this.Agents.Sum(x => x.Inventory.Get(Constants.Money));
-            if (this.maxMoney < totalMoney)
+            var totalMoney = this.Agents.Sum(x => x.Inventory.Get(Constants.Money)) + this.Money;
+
+            foreach (var agent in this.Agents)
             {
-                var percent = this.maxMoney / totalMoney;
-                foreach (var agent in this.Agents)
-                {
-                    agent.Inventory.Set(
-                        Constants.Money,
-                        percent * agent.Inventory.Get(Constants.Money)
-                    );
-                }
+                var money = agent.Inventory.Get(Constants.Money);
+                var percent = Math.Clamp((money - 100) / (1000 - 100), 0.0, 1.0);
+
+                var amount = Math.Max(1, percent * money);
+                this.Money += amount;
+                agent.Inventory.Remove(Constants.Money, amount);
             }
         }
     }

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bazaar.Exchange
+namespace Laguna.Market
 {
-    public struct MarketHistory
+    public class MarketHistory
     {
         public string Commodity { get; set; }
         public int SuccessfulTrades { get; set; }

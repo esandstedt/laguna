@@ -1,5 +1,4 @@
-﻿using Bazaar.Example.ConsoleApp.Agents;
-using Bazaar.Exchange;
+﻿using Laguna.Market;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +17,7 @@ namespace Bazaar.Example.ConsoleApp
 
         public Town AddTown(string name, Area area, int agentCount = 200)
         {
-            var town = new Town(name, area, agentCount, 100 * agentCount);
+            var town = new Town(name, area, agentCount);
             this.Towns.Add(town);
             return town;
         }
@@ -32,9 +31,9 @@ namespace Bazaar.Example.ConsoleApp
 
         public void Step()
         {
-            foreach (var route in this.Routes)
+            foreach (var town in this.Towns)
             {
-                route.Step();
+                town.Step();
             }
 
             foreach (var agent in this.Agents)
@@ -53,9 +52,9 @@ namespace Bazaar.Example.ConsoleApp
                 agent.HandleOfferResults();
             }
 
-            foreach (var town in this.Towns)
+            foreach (var route in this.Routes)
             {
-                town.Step();
+                route.Step();
             }
         }
 

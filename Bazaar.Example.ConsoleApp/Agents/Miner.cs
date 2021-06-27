@@ -13,9 +13,11 @@ namespace Bazaar.Example.ConsoleApp.Agents
             this.Behaviors.Add(eat);
             this.Behaviors.Add(new ProduceBehavior(
                 this,
+                town,
                 eat,
                 new AreaProduceBehaviorOptions(this, town, Constants.Ore)
                 {
+                    BaseAmount = 0.5,
                     EatFactor = 2,
                     ToolsFactor = 4,
                     ToolsBreakChance = 0.1

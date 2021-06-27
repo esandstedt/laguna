@@ -1,10 +1,10 @@
-﻿using Bazaar.Exchange;
+﻿using Laguna.Market;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Bazaar
+namespace Laguna
 {
     public static class Extensions
     {
@@ -30,6 +30,21 @@ namespace Bazaar
                 offer.Price,
                 amount
             );
+        }
+
+        private static Random random = new Random();
+
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            var n = list.Count;
+            while (n > 1)
+            {
+                n -= 1;
+                var k = random.Next(n + 1);
+                var v = list[k];
+                list[k] = list[n];
+                list[n] = v;
+            }
         }
     }
 }

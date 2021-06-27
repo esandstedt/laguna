@@ -1,4 +1,4 @@
-﻿using Bazaar.Exchange;
+﻿using Laguna.Market;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,21 +8,19 @@ namespace Bazaar.Example.ConsoleApp
 {
     public class Trader : IAgent
     {
-        private const double PROFIT_THRESHOLD = 1;
-
         public string Type => "trader";
 
         public Route Route { get; }
 
-        private readonly TraderPresence first;
-        private readonly TraderPresence second;
+        public TraderPresence First { get; }
+        public TraderPresence Second { get; }
 
         public Trader(Route route)
         {
             this.Route = route;
 
-            this.first = new TraderPresence(route.First.Market);
-            this.second = new TraderPresence(route.Second.Market);
+            this.First = new TraderPresence(route.First.Market);
+            this.Second = new TraderPresence(route.Second.Market);
         }
 
         public void Perform()
@@ -30,11 +28,11 @@ namespace Bazaar.Example.ConsoleApp
             // Transport commodities to other market
             foreach (var commodity in Constants.TradableCommodities)
             {
-                var firstAmount = this.first.BuyInventory.Get(commodity);
+                var firstAmount = this.First.BuyInventory.Get(commodity);
                 if (0 < firstAmount)
                 {
-                    this.second.SellInventory.Add(commodity, firstAmount);
-                    this.first.BuyInventory.Set(commodity, 0);
+                    this.Second.SellInventory.Add(commodity, firstAmount);
+                    this.First.BuyInventory.Set(commodity, 0);
 
                     if (!this.Route.History.FirstExports.ContainsKey(commodity))
                     {
@@ -44,11 +42,11 @@ namespace Bazaar.Example.ConsoleApp
                     this.Route.History.FirstExports[commodity] += firstAmount;
                 }
 
-                var secondAmount = this.second.BuyInventory.Get(commodity);
+                var secondAmount = this.Second.BuyInventory.Get(commodity);
                 if (0 < secondAmount)
                 {
-                    this.first.SellInventory.Add(commodity, secondAmount);
-                    this.second.BuyInventory.Set(commodity, 0);
+                    this.First.SellInventory.Add(commodity, secondAmount);
+                    this.Second.BuyInventory.Set(commodity, 0);
 
                     if (!this.Route.History.SecondExports.ContainsKey(commodity))
                     {
@@ -58,28 +56,43 @@ namespace Bazaar.Example.ConsoleApp
                     this.Route.History.SecondExports[commodity] += secondAmount;
                 }
             }
-
-            // Move money to buy inventory in both presences
-            this.first.BuyInventory.Add(Constants.Money, this.first.SellInventory.Get(Constants.Money));
-            this.first.SellInventory.Set(Constants.Money, 0);
-
-            this.second.BuyInventory.Add(Constants.Money, this.second.SellInventory.Get(Constants.Money));
-            this.second.SellInventory.Set(Constants.Money, 0);
-
-            var money = this.first.BuyInventory.Get(Constants.Money) + this.second.BuyInventory.Get(Constants.Money);
         }
 
         public void SubmitOffers()
         {
-            var firstBuyOffers = this.GenerateBuyOffers(this.first, this.second);
-            this.first.SubmitOffers(firstBuyOffers);
+            var firstBuyOffers = this.GenerateBuyOffers(this.First, this.Second);
+            this.First.SubmitOffers(firstBuyOffers);
 
-            var secondBuyOffers = this.GenerateBuyOffers(this.second, this.first);
-            this.second.SubmitOffers(secondBuyOffers);
+            var secondBuyOffers = this.GenerateBuyOffers(this.Second, this.First);
+            this.Second.SubmitOffers(secondBuyOffers);
         }
 
         private IEnumerable<Offer> GenerateBuyOffers(TraderPresence src, TraderPresence dest)
         {
+            var money = src.BuyInventory.Get(Constants.Money);
+
+            var trades = GenerateBestTrades(src, dest).Take(3).ToList();
+
+            var ratio = 10 / trades.Sum(x => x.Item1);
+
+            foreach (var trade in trades)
+            {
+                var diff = trade.Item1;
+                var commodity = trade.Item2;
+                var price = src.BuyPriceBeliefs.GetRandom(commodity);
+                var amount = Math.Min(ratio * diff, money / price);
+
+                yield return new Offer(
+                    OfferType.Buy,
+                    commodity,
+                    price,
+                    amount
+                );
+
+                money -= price * amount;
+            }
+
+            /*
             var trades = GenerateBestTrades(src, dest).Where(x => PROFIT_THRESHOLD < x.Item1).Take(3).ToList();
             if (trades.Any()) {
                 var ratio = 10 / trades.Sum(x => x.Item1);
@@ -96,6 +109,7 @@ namespace Bazaar.Example.ConsoleApp
                     );
                 }
             }
+             */
         }
 
         private IEnumerable<(double, string)> GenerateBestTrades(TraderPresence src, TraderPresence dest)
@@ -114,8 +128,19 @@ namespace Bazaar.Example.ConsoleApp
 
         public void HandleOfferResults()
         {
-            this.first.HandleOfferResults();
-            this.second.HandleOfferResults();
+            this.First.HandleOfferResults();
+            this.Second.HandleOfferResults();
+
+            // Split money evenly across the two presences.
+            var money = this.First.BuyInventory.Get(Constants.Money) +
+                this.First.SellInventory.Get(Constants.Money) +
+                this.Second.BuyInventory.Get(Constants.Money) +
+                this.Second.SellInventory.Get(Constants.Money);
+
+            this.First.BuyInventory.Set(Constants.Money, money / 2);
+            this.First.SellInventory.Set(Constants.Money, 0);
+            this.Second.BuyInventory.Set(Constants.Money, money / 2);
+            this.Second.SellInventory.Set(Constants.Money, 0);
         }
     }
 
@@ -132,6 +157,8 @@ namespace Bazaar.Example.ConsoleApp
         public TraderPresence(IMarket market)
         {
             this.market = market;
+
+            this.BuyInventory.Add(Constants.Money, 100);
         }
 
         public void SubmitOffers(IEnumerable<Offer> buyOffers)
@@ -173,17 +200,20 @@ namespace Bazaar.Example.ConsoleApp
         {
             foreach (var offer in this.offers)
             {
+                var amount = offer.Results.Sum(x => x.Amount);
+                var money = offer.Results.Sum(x => x.Amount * x.Price);
+
                 if (offer.Type == OfferType.Buy)
                 {
-                    this.BuyInventory.Add(offer.Commodity, offer.Amount);
-                    this.BuyInventory.Remove(Constants.Money, offer.Price * offer.Amount);
+                    this.BuyInventory.Add(offer.Commodity, amount);
+                    this.BuyInventory.Remove(Constants.Money, money);
 
                     this.BuyPriceBeliefs.Update(offer);
                 }
                 else if (offer.Type == OfferType.Sell)
                 {
-                    this.SellInventory.Remove(offer.Commodity, offer.Amount);
-                    this.SellInventory.Add(Constants.Money, offer.Price * offer.Amount);
+                    this.SellInventory.Add(Constants.Money, money);
+                    this.SellInventory.Remove(offer.Commodity, amount);
 
                     this.SellPriceBeliefs.Update(offer);
                 }

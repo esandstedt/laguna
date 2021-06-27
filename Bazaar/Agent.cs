@@ -1,4 +1,5 @@
-﻿using Bazaar.Exchange;
+﻿using Laguna;
+using Laguna.Market;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -63,9 +64,12 @@ namespace Bazaar
 
             var money = this.Inventory.Get(Constants.Money);
 
-            var buyOffers = offers.Where(x => x.Type == OfferType.Buy)
+            var buyOffers = offers
+                .Where(x => x.Type == OfferType.Buy)
                 .SelectMany(x => x.Split(1))
-                .OrderBy(x => Guid.NewGuid());
+                .ToList();
+
+            buyOffers.Shuffle();
 
             foreach (var offer in buyOffers)
             {

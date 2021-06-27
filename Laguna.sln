@@ -4,8 +4,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bazaar", "Bazaar\Bazaar.csproj", "{65CD5BFD-27D5-4C82-A6C0-19587C66D897}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6B50413B-A90F-4205-9F0C-DBDC185F293C} = {6B50413B-A90F-4205-9F0C-DBDC185F293C}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bazaar.Example.ConsoleApp", "Bazaar.Example.ConsoleApp\Bazaar.Example.ConsoleApp.csproj", "{35F97A00-B990-4205-9A58-7AE0A03B206D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6B50413B-A90F-4205-9F0C-DBDC185F293C} = {6B50413B-A90F-4205-9F0C-DBDC185F293C}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Laguna.Market", "Laguna.Market\Laguna.Market.csproj", "{6B50413B-A90F-4205-9F0C-DBDC185F293C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +29,10 @@ Global
 		{35F97A00-B990-4205-9A58-7AE0A03B206D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35F97A00-B990-4205-9A58-7AE0A03B206D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35F97A00-B990-4205-9A58-7AE0A03B206D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B50413B-A90F-4205-9F0C-DBDC185F293C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B50413B-A90F-4205-9F0C-DBDC185F293C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B50413B-A90F-4205-9F0C-DBDC185F293C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B50413B-A90F-4205-9F0C-DBDC185F293C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

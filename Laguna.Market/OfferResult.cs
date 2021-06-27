@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bazaar.Exchange
+namespace Laguna.Market
 {
     public class OfferResult
     {

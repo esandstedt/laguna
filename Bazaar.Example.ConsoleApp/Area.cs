@@ -6,6 +6,6 @@ namespace Bazaar.Example.ConsoleApp
 {
     public class Area
     {
-        public Dictionary<string, double> Production { get; set; }
+        public Dictionary<string, double> Capacity { get; set; }
     }
 }

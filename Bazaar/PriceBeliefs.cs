@@ -1,4 +1,4 @@
-﻿using Bazaar.Exchange;
+﻿using Laguna.Market;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,32 +16,12 @@ namespace Bazaar
 
         public void Initialize(IMarket market)
         {
-            foreach (var commodity in market.GetCommodities())
+            foreach (var key in market.History.Keys)
             {
-                IList<MarketHistory> history = market.GetHistory(commodity).ToList();
-                if (history.Any())
-                {
-                    var list = history.Take(10).ToList();
-
-                    var listWhereTraded = list.Where(x => 0 < x.AmountTraded).ToList();
-                    if (listWhereTraded.Any())
-                    {
-                        var avgPrice = listWhereTraded.Average(x => x.AveragePrice);
-                        this.Set(
-                            commodity,
-                            0.8 * avgPrice, 
-                            1.2 * avgPrice
-                        );
-                    }
-                    else
-                    {
-                        var avgPrice = list.Average(x => x.LowestSellingPrice);
-                        this.Set(
-                            commodity,
-                            0.8 * avgPrice,
-                            1.2 * avgPrice
-                        );
-                    }
+                var value = market.History[key];
+                if (!double.IsNaN(value.AveragePrice))
+                { 
+                    this.priceBeliefs[key] = (value.AveragePrice, value.AveragePrice); 
                 }
             }
         }
@@ -142,7 +122,7 @@ namespace Bazaar
         {
             if (!this.priceBeliefs.ContainsKey(commodity))
             {
-                this.priceBeliefs[commodity] = (1, 1);
+                this.priceBeliefs[commodity] = (MinValue, MaxValue);
             }
         }
     }

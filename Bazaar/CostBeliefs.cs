@@ -1,5 +1,4 @@
-﻿using Bazaar.Exchange;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -44,7 +43,7 @@ namespace Bazaar
 
                 var totalCount = produces.Sum(x => x.Value);
 
-                if (totalCount != 0)
+                if (totalCount != 0 && consumes.Any())
                 {
                     var (minTotalCost, maxTotalCost) = consumes
                         .Select(pair =>

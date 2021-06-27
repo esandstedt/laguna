@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Bazaar.Example.ConsoleApp
@@ -26,6 +27,33 @@ namespace Bazaar.Example.ConsoleApp
         public void Step()
         {
             this.History = new RouteHistory();
+            this.TaxAgents();
+        }
+
+        private void TaxAgents()
+        {
+            var totalMoney = this.Agents
+                .Cast<Trader>()
+                .Sum(x => x.First.BuyInventory.Get(Constants.Money) + x.Second.BuyInventory.Get(Constants.Money));
+
+            foreach (var agent in this.Agents.Cast<Trader>())
+            {
+                {
+                    var money = agent.First.BuyInventory.Get(Constants.Money);
+                    var percent = Math.Clamp((money - 100) / (1000 - 100), 0.0, 1.0);
+                    var amount =  percent * money;
+                    this.First.Money += amount;
+                    agent.First.BuyInventory.Remove(Constants.Money, amount);
+                }
+
+                {
+                    var money = agent.Second.BuyInventory.Get(Constants.Money);
+                    var percent = Math.Clamp((money - 100) / (1000 - 100), 0.0, 1.0);
+                    var amount = percent * money;
+                    this.Second.Money += amount;
+                    agent.Second.BuyInventory.Remove(Constants.Money, amount);
+                }
+            }
         }
     }
 

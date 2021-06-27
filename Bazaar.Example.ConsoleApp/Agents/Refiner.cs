@@ -1,5 +1,5 @@
 ﻿using Bazaar.Example.ConsoleApp.Behaviors;
-using Bazaar.Exchange;
+using Laguna.Market;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -57,7 +57,7 @@ namespace Bazaar.Example.ConsoleApp.Agents
             }
             else
             {
-                this.Consume(Constants.Money, 1);
+                //this.Consume(Constants.Money, 1);
             }
         }
 

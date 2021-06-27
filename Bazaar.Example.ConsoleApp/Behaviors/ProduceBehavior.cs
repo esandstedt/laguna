@@ -1,4 +1,4 @@
-﻿using Bazaar.Exchange;
+﻿using Laguna.Market;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +11,6 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
     {
         public AreaProduceBehaviorOptions(Agent agent, Town town, string commodity)
         {
-            var count = town.Agents.Count(x => x.Type == agent.Type);
-            this.BaseAmount = Math.Pow(0.99, count) * town.Area.Production[commodity];
             this.Commodity = commodity;
         }
     }
@@ -21,7 +19,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
     public class ProduceBehaviorOptions
     {
         public string Commodity { get; set; }
-        public virtual double BaseAmount { get; set; }
+        public double BaseAmount { get; set; }
         public double EatFactor { get; set; }
         public double ToolsFactor { get; set; }
         public double ToolsBreakChance { get; set; }
@@ -29,22 +27,27 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
 
     public class ProduceBehavior : AgentBehavior
     {
+        private readonly Town town;
         private readonly EatBehavior eat;
         private readonly ProduceBehaviorOptions options;
 
         public ProduceBehavior(
             Agent agent,
+            Town town,
             EatBehavior eat,
             ProduceBehaviorOptions options)
             : base(agent)
         {
+            this.town = town;
             this.eat = eat;
             this.options = options;
         }
 
         public override void Perform()
         {
-            var limit = this.options.BaseAmount * this.options.EatFactor * this.options.ToolsFactor;
+            var ratio = this.town.GetRatio(this.options.Commodity);
+
+            var limit = ratio * this.options.BaseAmount * this.options.EatFactor * this.options.ToolsFactor;
             if (this.Agent.Inventory.Get(this.options.Commodity) < limit)
             {
                 this.Agent.CostBeliefs.BeginUnit();
@@ -72,7 +75,7 @@ namespace Bazaar.Example.ConsoleApp.Behaviors
             }
             else
             {
-                this.Consume(Constants.Money, 1);
+                //this.Consume(Constants.Money, 1);
             }
         }
 

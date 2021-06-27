@@ -1,26 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
-namespace Bazaar.Exchange
+namespace Laguna.Market
 {
-    public interface IMarket
+    public class MarketImpl : IMarket
     {
-        void AddOffer(Offer offer);
-        void ResolveOffers();
-
-        IEnumerable<MarketHistory> GetHistory(string commodity);
-        IEnumerable<string> GetCommodities();
-    }
-
-    public class Market : IMarket
-    {
-
-        private const int HISTORY_LIMIT = 20;
 
         private readonly List<Offer> offers = new List<Offer>();
-        private readonly Dictionary<string, List<MarketHistory>> history = new Dictionary<string, List<MarketHistory>>();
+        public Dictionary<string, MarketHistory> History { get; set; } = new Dictionary<string, MarketHistory>();
 
         public void AddOffer(Offer offer)
         {
@@ -107,7 +96,7 @@ namespace Bazaar.Exchange
 
                 var avgPrice = moneyTraded / amountTraded;
 
-                this.AddHistory(commodity, new MarketHistory
+                this.History[commodity] = new MarketHistory
                 {
                     Commodity = commodity,
                     SuccessfulTrades = succesfulTrades,
@@ -120,38 +109,11 @@ namespace Bazaar.Exchange
                     HighestSellingPrice = highestSellingPrice,
                     LowestBuyingPrice = lowestBuyingPrice,
                     HighestBuyingPrice = highestBuyingPrice,
-                });
+                };
 
             }
 
             this.offers.Clear();
-        }
-
-        private void AddHistory(string commodity, MarketHistory history)
-        {
-            if (!this.history.ContainsKey(commodity))
-            {
-                this.history[commodity] = new List<MarketHistory>();
-            }
-
-            var list = this.history[commodity];
-
-            list.Insert(0, history);
-
-            if (HISTORY_LIMIT < list.Count)
-            {
-                list.RemoveAt(list.Count - 1);
-            }
-        }
-
-        public IEnumerable<MarketHistory> GetHistory(string commodity)
-        {
-            return this.history.GetValueOrDefault(commodity, new List<MarketHistory>());
-        }
-
-        public IEnumerable<string> GetCommodities()
-        {
-            return this.history.Keys;
         }
     }
 }
