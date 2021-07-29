@@ -17,6 +17,10 @@ namespace Laguna.Example.ConsoleApp
         public double FoodSupply { get; set; }
         public double FoodTraded { get; set; }
         public double FoodPrice { get; set; }
+        public double WoodDemand { get; set; }
+        public double WoodSupply { get; set; }
+        public double WoodTraded { get; set; }
+        public double WoodPrice { get; set; }
         public double TimberDemand { get; set; }
         public double TimberSupply { get; set; }
         public double TimberTraded { get; set; }
@@ -27,14 +31,13 @@ namespace Laguna.Example.ConsoleApp
     {
         public static void Main(string[] args)
         {
-            var farm = Industry.CreateFarm(200);
-
             var province = new Province()
             {
                 Industries = new List<Industry>()
                 {
-                    farm,
+                    Industry.CreateFarm(300),
                     Industry.CreateForest(100),
+                    Industry.CreateSawmill(20),
                 },
                 Persons = Enumerable.Repeat(0, 500)
                     .Select(_ => new Person())
@@ -43,31 +46,24 @@ namespace Laguna.Example.ConsoleApp
 
             var records = new List<CsvRecord>();
 
-            for (var i=0; i<500; i++)
+            for (var i=0; i<1000; i++)
             {
-                province.Persons.Add(new Person());
-                if (i == 200)
-                {
-                    province.Industries.Add(Industry.CreateFarm(200));
-                    province.Industries.Add(Industry.CreateFarm(200));
-                    province.Industries.Add(Industry.CreateFarm(200));
-                }
 
                 province.Step();
 
                 var unskilledWork = province.Market.History.GetValueOrDefault(Constants.UnskilledWork);
                 var food = province.Market.History.GetValueOrDefault(Constants.Food);
-                var foodAmountAverage = province.Persons.Average(x => x.Inventory.Get(Constants.Food));
+                var wood = province.Market.History.GetValueOrDefault(Constants.Wood);
                 var timber = province.Market.History.GetValueOrDefault(Constants.Timber);
-                var timberAmountAverage = province.Persons.Average(x => x.Inventory.Get(Constants.Timber));
 
                 Console.WriteLine(
-                    "{0,5} {1,5:N0} || {2} || {3} || {4}",
+                    "{0,5} {1,5:N0} || {2} || {3} || {4} || {5}",
                     i,
                     province.Persons.Count,
                     string.Format("{0,6:N0} {1,6:N0} {2,6:F2}", unskilledWork.AmountTraded, unskilledWork.AmountToSell - unskilledWork.AmountToBuy, unskilledWork.AveragePrice),
                     string.Format("{0,6:N0} {1,6:N0} {2,6:F2}", food.AmountTraded, food.AmountToSell - food.AmountToBuy, food.AveragePrice),
-                    string.Format("{0,6:N0} {1,6:N0} {2,6:F2}", timber.AmountTraded, timber.AmountToSell - timber.AmountToBuy, timber.AveragePrice)
+                    string.Format("{0,6:N0} {1,6:N0} {2,6:F2}", wood.AmountTraded, wood.AmountToSell - wood.AmountToBuy, wood.AveragePrice),
+                    string.Format("{0,6:N0} {1,6:N0} {2,6:F2}", timber?.AmountTraded, timber?.AmountToSell - timber?.AmountToBuy, timber?.AveragePrice)
                 );
 
                 records.Add(new CsvRecord
@@ -80,6 +76,10 @@ namespace Laguna.Example.ConsoleApp
                     FoodSupply = food.AmountToSell,
                     FoodTraded = food.AmountTraded,
                     FoodPrice = food.AveragePrice,
+                    WoodDemand = wood.AmountToBuy,
+                    WoodSupply = wood.AmountToSell,
+                    WoodTraded = wood.AmountTraded,
+                    WoodPrice = wood.AveragePrice,
                     TimberDemand = timber.AmountToBuy,
                     TimberSupply = timber.AmountToSell,
                     TimberTraded = timber.AmountTraded,

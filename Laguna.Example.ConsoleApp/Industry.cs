@@ -11,8 +11,9 @@ namespace Laguna.Example.ConsoleApp
     public class IndustryOptions
     {
         public double Capacity { get; set; }
+        public List<(string Commodity, double Amount)> Consumes { get; set; }
+        public List<(string Commodity, double Amount)> Produces { get; set; }
         public string Good { get; set; }
-        public double BaseRate { get; set; }
         public double Productivity { get; set; }
         public double SpoilRate { get; set; }
     }
@@ -32,61 +33,99 @@ namespace Laguna.Example.ConsoleApp
 
         public void Step()
         {
-            var workAmount = this.Inventory.Get(Constants.UnskilledWork);
-            var goodAmount = this.Options.Productivity * workAmount;
+            // Apply spoil rate to production
+            foreach (var produce in this.Options.Produces)
+            {
+                this.Inventory.Set(
+                    produce.Commodity,
+                    (1 - this.Options.SpoilRate) * this.Inventory.Get(produce.Commodity)
+                );
+            }
 
+            // Figure out how many "units" are produced
+            var units = double.MaxValue;
+            foreach (var consume in this.Options.Consumes)
+            {
+                units = Math.Min(
+                    units,
+                    this.Inventory.Get(consume.Commodity) / consume.Amount
+                );
+            }
+
+            // Produce
             this.CostBeliefs.Begin();
-            this.CostBeliefs.Consume(Constants.UnskilledWork, workAmount);
-            this.CostBeliefs.Produce(this.Options.Good, goodAmount);
+
+            foreach (var consume in this.Options.Consumes)
+            {
+                var amount = units * consume.Amount;
+                this.CostBeliefs.Consume(consume.Commodity, amount);
+                this.Inventory.Remove(consume.Commodity, amount);
+            }
+
+            foreach (var produce in this.Options.Produces)
+            {
+                var amount = units * produce.Amount;
+                this.CostBeliefs.Produce(produce.Commodity, amount);
+                this.Inventory.Add(produce.Commodity, amount);
+            }
+
             this.CostBeliefs.End();
 
-            this.Inventory.Set(this.Options.Good, (1 - this.Options.SpoilRate) * this.Inventory.Get(this.Options.Good));
+            // Ensure there's always something being produced
+            if (units < 1)
+            {
+                foreach (var produce in this.Options.Produces)
+                {
+                    this.Inventory.Add(produce.Commodity, 1);
+                }
+            }
 
-            this.Inventory.Add(this.Options.Good, Math.Max(this.Options.BaseRate, goodAmount));
+            // Throw all unused work away
             this.Inventory.Set(Constants.UnskilledWork, 0);
         }
 
         public override IEnumerable<Offer> CreateOffers()
         {
-            var x = this.Inventory.Get(this.Options.Good);
-            while (0 < x)
+            foreach (var produce in this.Options.Produces)
             {
-                yield return new Offer(
+                var offers = this.CreateOffers(
                     OfferType.Sell,
-                    this.Options.Good,
-                    this.PriceBeliefs.GetRandom(this.Options.Good),
-                    Math.Min(1, x)
+                    produce.Commodity,
+                    this.Inventory.Get(produce.Commodity)
                 );
 
-                x -= 1;
-            }
-
-            var buyOffers = new List<Offer>();
-
-            x = this.Options.Capacity;
-            while (0 < x)
-            {
-                buyOffers.Add(new Offer(
-                    OfferType.Buy,
-                    Constants.UnskilledWork,
-                    this.PriceBeliefs.GetRandom(Constants.UnskilledWork),
-                    Math.Min(1, x)
-                ));
-
-                x -= 1;
-            }
-
-            var money = this.Inventory.Get(Constants.Money);
-            foreach (var offer in buyOffers.SelectMany(x => x.Split(1)))
-            {
-                money -= offer.Price * offer.Amount;
-
-                if (money < 0)
+                foreach (var offer in offers)
                 {
-                    break;
+                    yield return offer;
+                }
+            }
+
+            {
+                var offers = new List<Offer>();
+
+                foreach (var consume in this.Options.Consumes)
+                {
+                    offers.AddRange(this.CreateOffers(
+                        OfferType.Buy,
+                        consume.Commodity,
+                        this.Options.Capacity * consume.Amount
+                    ));
                 }
 
-                yield return offer;
+                offers.Shuffle();
+
+                var money = this.Inventory.Get(Constants.Money);
+                foreach (var offer in offers)
+                {
+                    money -= offer.Price * offer.Amount;
+
+                    if (money < 0)
+                    {
+                        break;
+                    }
+
+                    yield return offer;
+                }
             }
         }
 
@@ -96,10 +135,15 @@ namespace Laguna.Example.ConsoleApp
                 new IndustryOptions
                 {
                     Capacity = capacity,
-                    Good = Constants.Food,
-                    BaseRate = 1.0,
-                    Productivity = 4.0,
-                    SpoilRate = 0.25
+                    Consumes = new List<(string, double)>
+                    {
+                        (Constants.UnskilledWork, 1.0),
+                    },
+                    Produces = new List<(string, double)>
+                    {
+                        (Constants.Food, 6.0)
+                    },
+                    SpoilRate = 0.25,
                 }
             );
         }
@@ -110,12 +154,38 @@ namespace Laguna.Example.ConsoleApp
                 new IndustryOptions
                 {
                     Capacity = capacity,
-                    Good = Constants.Timber,
-                    BaseRate = 1.0,
-                    Productivity = 4.0,
-                    SpoilRate = 0.05
+                    Consumes = new List<(string, double)>
+                    {
+                        (Constants.UnskilledWork, 1.0),
+                    },
+                    Produces = new List<(string, double)>
+                    {
+                        (Constants.Wood, 8.0)
+                    },
+                    SpoilRate = 0.05,
                 }
             );
+        }
+
+        public static Industry CreateSawmill(double capacity)
+        {
+            return new Industry(
+                new IndustryOptions
+                {
+                    Capacity = capacity,
+                    Consumes = new List<(string Good, double Amount)>
+                    {
+                        (Constants.UnskilledWork, 1.0),
+                        (Constants.Wood, 1.0),
+                    },
+                    Produces = new List<(string Good, double Amount)>
+                    {
+                        (Constants.Timber, 4.0)
+                    },
+                    SpoilRate = 0.05,
+                }
+            );
+
         }
     }
 }

@@ -29,22 +29,13 @@ namespace Laguna.Example.ConsoleApp
             );
             this.CostBeliefs.Consume(Constants.Food, 1);
 
-            if (0 < this.Inventory.Get(Constants.Timber))
+            if (0 < this.Inventory.Get(Constants.Wood))
             {
                 this.Inventory.Set(
-                    Constants.Timber,
-                    Math.Max(0, this.Inventory.Get(Constants.Timber) - 1)
+                    Constants.Wood,
+                    Math.Max(0, this.Inventory.Get(Constants.Wood) - 1)
                 );
-                this.CostBeliefs.Consume(Constants.Timber, 1);
-            }
-
-            if (2 < this.Inventory.Get(Constants.Timber))
-            {
-                this.Inventory.Set(
-                    Constants.Timber,
-                    Math.Max(0, this.Inventory.Get(Constants.Food) - 1)
-                );
-                this.CostBeliefs.Consume(Constants.Food, 1);
+                this.CostBeliefs.Consume(Constants.Wood, 1);
             }
 
             this.CostBeliefs.End();
@@ -77,6 +68,16 @@ namespace Laguna.Example.ConsoleApp
             }
 
             if (2 < this.Inventory.Get(Constants.Food))
+            {
+                buyOffers.Add(new Offer(
+                        OfferType.Buy,
+                        Constants.Wood,
+                        this.PriceBeliefs.GetRandom(Constants.Wood),
+                        Math.Max(2, 5 - this.Inventory.Get(Constants.Wood))
+                ));
+            }
+
+            if (2 < this.Inventory.Get(Constants.Wood))
             {
                 buyOffers.Add(new Offer(
                         OfferType.Buy,

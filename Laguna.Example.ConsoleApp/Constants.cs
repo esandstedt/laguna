@@ -18,6 +18,7 @@ namespace Laguna.Example.ConsoleApp
         public const string Fish = "fish";
         public const string Meat = "meat";
 
+        public const string Wood = "wood";
         public const string Timber = "timber";
     }
 }

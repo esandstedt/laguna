@@ -20,6 +20,21 @@ namespace Laguna.Example.ConsoleApp
 
         public abstract IEnumerable<Offer> CreateOffers();
 
+        protected IEnumerable<Offer> CreateOffers(OfferType type, string commodity, double amount)
+        {
+            while (0 < amount)
+            {
+                yield return new Offer(
+                    type,
+                    commodity,
+                    this.PriceBeliefs.GetRandom(commodity),
+                    Math.Min(1, amount)
+                );
+
+                amount -= 1;
+            }
+        }
+
         public virtual void HandleOfferResults(IEnumerable<Offer> offers)
         {
             foreach (var offer in offers)
