@@ -67,7 +67,7 @@ namespace Laguna.Market
                         amountRemaining[sell]
                     );
 
-                    var price = sell.Price + (buy.Price - sell.Price) / 2;
+                    var price = (sell.Price + buy.Price) / 2;
                     var result = new OfferResult(amount, price);
 
                     buy.Results.Add(result);
