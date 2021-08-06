@@ -129,7 +129,11 @@ namespace Laguna.Example.ConsoleApp
             }
         }
 
-        public static Industry CreateFarm(double capacity)
+        public static Industry CreateRaw(
+            double capacity,
+            string producesCommodity,
+            double producesAmount,
+            double spoilRate)
         {
             return new Industry(
                 new IndustryOptions
@@ -141,28 +145,9 @@ namespace Laguna.Example.ConsoleApp
                     },
                     Produces = new List<(string, double)>
                     {
-                        (Constants.Food, 6.0)
+                        (producesCommodity, producesAmount)
                     },
-                    SpoilRate = 0.25,
-                }
-            );
-        }
-
-        public static Industry CreateForest(double capacity)
-        {
-            return new Industry(
-                new IndustryOptions
-                {
-                    Capacity = capacity,
-                    Consumes = new List<(string, double)>
-                    {
-                        (Constants.UnskilledWork, 1.0),
-                    },
-                    Produces = new List<(string, double)>
-                    {
-                        (Constants.Wood, 8.0)
-                    },
-                    SpoilRate = 0.05,
+                    SpoilRate = spoilRate 
                 }
             );
         }
@@ -185,7 +170,26 @@ namespace Laguna.Example.ConsoleApp
                     SpoilRate = 0.05,
                 }
             );
+        }
 
+        public static Industry CreateBakery(double capacity)
+        {
+            return new Industry(
+                new IndustryOptions
+                {
+                    Capacity = capacity,
+                    Consumes = new List<(string Good, double Amount)>
+                    {
+                        (Constants.UnskilledWork, 1.0),
+                        (Constants.Grain, 1.0),
+                    },
+                    Produces = new List<(string Good, double Amount)>
+                    {
+                        (Constants.Bread, 4.0)
+                    },
+                    SpoilRate = 0.125,
+                }
+            );
         }
     }
 }

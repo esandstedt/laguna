@@ -11,6 +11,21 @@ namespace Laguna.Example.ConsoleApp
     {
         public CostBeliefs CostBeliefs { get; set; }
 
+        public WeightedDemand FoodDemand = new WeightedDemand(
+            new Dictionary<string, double>
+            {
+                { Constants.Fruit, 1 },
+                { Constants.Vegetables, 1 },
+                { Constants.Meat, 1 },
+                { Constants.Fish, 1 },
+                { Constants.Grain, 0.5 },
+                { Constants.Bread, 2 },
+            },
+            0.10
+        );
+
+        private double Nutrition = 0;
+
         public Person()
         {
             this.CostBeliefs = new CostBeliefs(this.PriceBeliefs);
@@ -21,13 +36,25 @@ namespace Laguna.Example.ConsoleApp
         public void Step()
         {
             this.CostBeliefs.Begin();
+
+            this.Inventory.Set(Constants.UnskilledWork, 1);
             this.CostBeliefs.Produce(Constants.UnskilledWork, 1);
 
-            this.Inventory.Set(
-                Constants.Food,
-                Math.Max(0, this.Inventory.Get(Constants.Food) - 1)
-            );
-            this.CostBeliefs.Consume(Constants.Food, 1);
+            this.Nutrition = 0;
+            var foodDemand = this.FoodDemand.GetDemand(this.PriceBeliefs, 1);
+            foreach (var pair in foodDemand)
+            {
+                var (commodity, amount) = (pair.Key, pair.Value);
+
+                this.Inventory.Set(
+                    commodity,
+                    Math.Max(0, this.Inventory.Get(commodity) - amount)
+                );
+
+                this.CostBeliefs.Consume(commodity, amount);
+
+                this.Nutrition += amount;
+            }
 
             if (0 < this.Inventory.Get(Constants.Wood))
             {
@@ -53,37 +80,29 @@ namespace Laguna.Example.ConsoleApp
 
             var buyOffers = new List<Offer>();
 
+            var foodOffers = this.FoodDemand.GenerateOffers(this.Inventory, this.PriceBeliefs, 5);
+            foreach (var offer in foodOffers)
+            {
+                buyOffers.Add(offer);
+            }
 
-            var x = Math.Max(3, 5 - this.Inventory.Get(Constants.Food));
-            while (0 < x)
+            if (0.8 < this.Nutrition)
             {
                 buyOffers.Add(new Offer(
                     OfferType.Buy,
-                    Constants.Food,
-                    this.PriceBeliefs.GetRandom(Constants.Food),
-                    Math.Min(1, x)
-                ));
-
-                x -= 1;
-            }
-
-            if (2 < this.Inventory.Get(Constants.Food))
-            {
-                buyOffers.Add(new Offer(
-                        OfferType.Buy,
-                        Constants.Wood,
-                        this.PriceBeliefs.GetRandom(Constants.Wood),
-                        Math.Max(2, 5 - this.Inventory.Get(Constants.Wood))
+                    Constants.Wood,
+                    this.PriceBeliefs.GetRandom(Constants.Wood),
+                    Math.Max(2, 5 - this.Inventory.Get(Constants.Wood))
                 ));
             }
 
             if (2 < this.Inventory.Get(Constants.Wood))
             {
                 buyOffers.Add(new Offer(
-                        OfferType.Buy,
-                        Constants.Timber,
-                        this.PriceBeliefs.GetRandom(Constants.Timber),
-                        Math.Max(2, 5 - this.Inventory.Get(Constants.Timber))
+                    OfferType.Buy,
+                    Constants.Timber,
+                    this.PriceBeliefs.GetRandom(Constants.Timber),
+                    Math.Max(2, 5 - this.Inventory.Get(Constants.Timber))
                 ));
             }
 

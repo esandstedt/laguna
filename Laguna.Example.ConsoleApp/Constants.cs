@@ -10,8 +10,6 @@ namespace Laguna.Example.ConsoleApp
 
         public const string UnskilledWork = "unskilled";
 
-        public const string Food = "food";
-
         public const string Grain = "grain";
         public const string Fruit = "fruit";
         public const string Vegetables = "vegetables";
@@ -20,5 +18,7 @@ namespace Laguna.Example.ConsoleApp
 
         public const string Wood = "wood";
         public const string Timber = "timber";
+
+        public const string Bread = "bread";
     }
 }
