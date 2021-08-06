@@ -14,12 +14,12 @@ namespace Laguna.Example.ConsoleApp
         public WeightedDemand FoodDemand = new WeightedDemand(
             new Dictionary<string, double>
             {
-                { Constants.Fruit, 1 },
-                { Constants.Vegetables, 1 },
-                { Constants.Meat, 1 },
-                { Constants.Fish, 1 },
-                { Constants.Grain, 0.5 },
-                { Constants.Bread, 2 },
+                { Constants.Fruit, 2 },
+                { Constants.Vegetables, 2 },
+                { Constants.Meat, 3 },
+                { Constants.Fish, 3 },
+                { Constants.Grain, 1 },
+                { Constants.Bread, 5 },
             },
             0.10
         );

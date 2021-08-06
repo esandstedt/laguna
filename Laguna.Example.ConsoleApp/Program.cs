@@ -48,7 +48,7 @@ namespace Laguna.Example.ConsoleApp
                     Industry.CreateRaw(50, Constants.Meat, 4, 0.25),
                     Industry.CreateRaw(50, Constants.Fish, 4, 0.25),
                     Industry.CreateRaw(25, Constants.Grain, 4, 0.125),
-                    Industry.CreateRaw(100, Constants.Wood, 8, 0.05),
+                    Industry.CreateRaw(100, Constants.Wood, 4, 0.05),
 
                     //Industry.CreateRaw(50, Constants.Fish, 16, 0.25),
                     //Industry.CreateRaw(25, Constants.Grain, 16, 0.125),
@@ -65,17 +65,27 @@ namespace Laguna.Example.ConsoleApp
 
             for (var i=0; i<1200; i++)
             {
+                if (i%4 == 0)
+                {
+                    province.Persons.Add(new Person());
+                }
+
                 if (i == 200)
                 {
                     province.Industries.Add(Industry.CreateRaw(50, Constants.Fish, 16, 0.25));
                 }
                 else if (i == 400)
                 {
-                    province.Industries.Add(Industry.CreateRaw(25, Constants.Grain, 16, 0.125));
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Grain, 16, 0.125));
                 } 
+                else if (i == 500)
+                {
+                    province.Industries.Add(Industry.CreateBakery(20));
+                }
                 else if (i == 600) 
                 {
                     province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Wood, 16, 0.05));
                 } 
 
                 province.Step();
