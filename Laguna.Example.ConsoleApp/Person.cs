@@ -60,9 +60,18 @@ namespace Laguna.Example.ConsoleApp
             {
                 this.Inventory.Set(
                     Constants.Wood,
-                    Math.Max(0, this.Inventory.Get(Constants.Wood) - 1)
+                    Math.Max(0, this.Inventory.Get(Constants.Wood) - 0.5)
                 );
-                this.CostBeliefs.Consume(Constants.Wood, 1);
+                this.CostBeliefs.Consume(Constants.Wood, 0.5);
+            }
+
+            if (0 < this.Inventory.Get(Constants.Timber))
+            {
+                this.Inventory.Set(
+                    Constants.Timber,
+                    Math.Max(0, this.Inventory.Get(Constants.Timber) - 0.25)
+                );
+                this.CostBeliefs.Consume(Constants.Timber, 0.25);
             }
 
             this.CostBeliefs.End();
@@ -77,7 +86,6 @@ namespace Laguna.Example.ConsoleApp
                 1
             );
 
-
             var buyOffers = new List<Offer>();
 
             var foodOffers = this.FoodDemand.GenerateOffers(this.Inventory, this.PriceBeliefs, 5);
@@ -86,23 +94,20 @@ namespace Laguna.Example.ConsoleApp
                 buyOffers.Add(offer);
             }
 
-            if (0.8 < this.Nutrition)
-            {
-                buyOffers.Add(new Offer(
-                    OfferType.Buy,
-                    Constants.Wood,
-                    this.PriceBeliefs.GetRandom(Constants.Wood),
-                    Math.Max(2, 5 - this.Inventory.Get(Constants.Wood))
-                ));
-            }
+            buyOffers.Add(new Offer(
+                OfferType.Buy,
+                Constants.Wood,
+                this.PriceBeliefs.GetRandom(Constants.Wood),
+                Math.Max(0, Math.Min(4 - this.Inventory.Get(Constants.Wood), 2))
+            ));
 
-            if (2 < this.Inventory.Get(Constants.Wood))
+            if (0.8 < this.Nutrition && 1 < this.Inventory.Get(Constants.Wood))
             {
                 buyOffers.Add(new Offer(
                     OfferType.Buy,
                     Constants.Timber,
                     this.PriceBeliefs.GetRandom(Constants.Timber),
-                    Math.Max(2, 5 - this.Inventory.Get(Constants.Timber))
+                    Math.Max(0, Math.Min(5 - this.Inventory.Get(Constants.Timber), 2))
                 ));
             }
 

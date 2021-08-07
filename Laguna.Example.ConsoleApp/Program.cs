@@ -43,18 +43,25 @@ namespace Laguna.Example.ConsoleApp
             {
                 Industries = new List<Industry>()
                 {
-                    Industry.CreateRaw(75, Constants.Fruit, 4, 0.125),
-                    Industry.CreateRaw(50, Constants.Vegetables, 4, 0.125),
-                    Industry.CreateRaw(50, Constants.Meat, 4, 0.25),
-                    Industry.CreateRaw(50, Constants.Fish, 4, 0.25),
-                    Industry.CreateRaw(25, Constants.Grain, 4, 0.125),
-                    Industry.CreateRaw(100, Constants.Wood, 4, 0.05),
+                    Industry.CreateRaw(50, Constants.Fruit, 2, 0.125),
+                    Industry.CreateRaw(50, Constants.Fruit, 2, 0.125),
+                    Industry.CreateRaw(50, Constants.Vegetables, 2, 0.125),
+                    Industry.CreateRaw(50, Constants.Vegetables, 2, 0.125),
+                    Industry.CreateRaw(50, Constants.Meat, 2, 0.25),
+                    Industry.CreateRaw(50, Constants.Meat, 2, 0.25),
+                    Industry.CreateRaw(50, Constants.Fish, 2, 0.25),
+                    Industry.CreateRaw(50, Constants.Fish, 2, 0.25),
+                    Industry.CreateRaw(50, Constants.Grain, 2, 0.125),
+                    Industry.CreateRaw(50, Constants.Wood, 2, 0.05),
+                    Industry.CreateRaw(50, Constants.Wood, 2, 0.05),
+                    Industry.CreateRaw(50, Constants.Wood, 2, 0.05),
+                    Industry.CreateRaw(50, Constants.Wood, 2, 0.05),
 
                     //Industry.CreateRaw(50, Constants.Fish, 16, 0.25),
                     //Industry.CreateRaw(25, Constants.Grain, 16, 0.125),
 
-                    Industry.CreateSawmill(20),
-                    Industry.CreateBakery(20),
+                    Industry.CreateSawmill(25),
+                    Industry.CreateBakery(25),
                 },
                 Persons = Enumerable.Repeat(0, 500)
                     .Select(_ => new Person())
@@ -63,30 +70,69 @@ namespace Laguna.Example.ConsoleApp
 
             var records = new List<CsvRecord>();
 
-            for (var i=0; i<1200; i++)
+            for (var i=-100; i<2000; i++)
             {
-                if (i%4 == 0)
+                if (i%4 == 0 && 0 < i && i <= 1000)
                 {
                     province.Persons.Add(new Person());
                 }
 
-                if (i == 200)
+                if (i == 100)
                 {
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Fish, 16, 0.25));
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Fish, 8, 0.25));
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Fish, 8, 0.25));
                 }
-                else if (i == 400)
+                else if (i == 200)
                 {
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Grain, 16, 0.125));
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Grain, 8, 0.125));
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Grain, 8, 0.125));
                 } 
-                else if (i == 500)
+                else if (i == 300)
                 {
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Fruit, 8, 0.125));
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Fruit, 8, 0.125));
+                    province.Industries.Add(Industry.CreateBakery(20));
                     province.Industries.Add(Industry.CreateBakery(20));
                 }
-                else if (i == 600) 
+                else if (i == 350)
                 {
                     province.Industries.Add(Industry.CreateBakery(20));
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Wood, 16, 0.05));
+                    province.Industries.Add(Industry.CreateBakery(20));
+                }
+                else if (i == 400) 
+                {
+                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.CreateBakery(20));
                 } 
+                else if (i == 450)
+                {
+                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.CreateBakery(20));
+                }
+                else if (i == 500) 
+                {
+                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.CreateBakery(20));
+                } 
+                else if (i == 550) 
+                {
+                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.CreateBakery(20));
+                } 
+                else if (i == 600)
+                {
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Wood, 8, 0.05));
+                    province.Industries.Add(Industry.CreateRaw(50, Constants.Wood, 8, 0.05));
+                }
+                else if (i == 1400)
+                {
+                    province.Industries.Add(Industry.CreateSawmill(20));
+                    province.Industries.Add(Industry.CreateSawmill(20));
+                    province.Industries.Add(Industry.CreateSawmill(20));
+                    province.Industries.Add(Industry.CreateSawmill(20));
+                    province.Industries.Add(Industry.CreateSawmill(20));
+                    province.Industries.Add(Industry.CreateSawmill(20));
+                }
 
                 province.Step();
 
@@ -109,33 +155,36 @@ namespace Laguna.Example.ConsoleApp
                     string.Format("{0,6:N0} {1,6:F2}", timber?.AmountTraded, timber?.AveragePrice)
                 );
 
-                records.Add(new CsvRecord
+                if (0 <= i)
                 {
-                    WorkDemand = unskilledWork.AmountToBuy,
-                    WorkSupply = unskilledWork.AmountToSell,
-                    WorkTraded = unskilledWork.AmountTraded,
-                    WorkPrice = unskilledWork.AveragePrice,
-                    GrainDemand = grain.AmountToBuy,
-                    GrainSupply = grain.AmountToSell,
-                    GrainTraded = grain.AmountTraded,
-                    GrainPrice = grain.AveragePrice,
-                    BreadDemand = bread.AmountToBuy,
-                    BreadSupply = bread.AmountToSell,
-                    BreadTraded = bread.AmountTraded,
-                    BreadPrice = bread.AveragePrice,
-                    FishDemand = fish.AmountToBuy,
-                    FishSupply = fish.AmountToSell,
-                    FishTraded = fish.AmountTraded,
-                    FishPrice = fish.AveragePrice,
-                    WoodDemand = wood.AmountToBuy,
-                    WoodSupply = wood.AmountToSell,
-                    WoodTraded = wood.AmountTraded,
-                    WoodPrice = wood.AveragePrice,
-                    TimberDemand = timber.AmountToBuy,
-                    TimberSupply = timber.AmountToSell,
-                    TimberTraded = timber.AmountTraded,
-                    TimberPrice = timber.AveragePrice,
-                });
+                    records.Add(new CsvRecord
+                    {
+                        WorkDemand = unskilledWork.AmountToBuy,
+                        WorkSupply = unskilledWork.AmountToSell,
+                        WorkTraded = unskilledWork.AmountTraded,
+                        WorkPrice = unskilledWork.AveragePrice,
+                        GrainDemand = grain.AmountToBuy,
+                        GrainSupply = grain.AmountToSell,
+                        GrainTraded = grain.AmountTraded,
+                        GrainPrice = grain.AveragePrice,
+                        BreadDemand = bread.AmountToBuy,
+                        BreadSupply = bread.AmountToSell,
+                        BreadTraded = bread.AmountTraded,
+                        BreadPrice = bread.AveragePrice,
+                        FishDemand = fish.AmountToBuy,
+                        FishSupply = fish.AmountToSell,
+                        FishTraded = fish.AmountTraded,
+                        FishPrice = fish.AveragePrice,
+                        WoodDemand = wood.AmountToBuy,
+                        WoodSupply = wood.AmountToSell,
+                        WoodTraded = wood.AmountTraded,
+                        WoodPrice = wood.AveragePrice,
+                        TimberDemand = timber.AmountToBuy,
+                        TimberSupply = timber.AmountToSell,
+                        TimberTraded = timber.AmountTraded,
+                        TimberPrice = timber.AveragePrice,
+                    });
+                }
             }
 
             var industryMoney = province.Industries.Sum(x => x.Inventory.Get(Constants.Money));
