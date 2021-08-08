@@ -43,34 +43,34 @@ namespace Laguna.Example.ConsoleApp
             {
                 Industries = new List<Industry>()
                 {
-                    Industry.CreateRaw(50, Constants.Fruit, 2, 0.125),
-                    Industry.CreateRaw(50, Constants.Fruit, 2, 0.125),
-                    Industry.CreateRaw(50, Constants.Vegetables, 2, 0.125),
-                    Industry.CreateRaw(50, Constants.Vegetables, 2, 0.125),
-                    Industry.CreateRaw(50, Constants.Meat, 2, 0.25),
-                    Industry.CreateRaw(50, Constants.Meat, 2, 0.25),
-                    Industry.CreateRaw(50, Constants.Fish, 2, 0.25),
-                    Industry.CreateRaw(50, Constants.Fish, 2, 0.25),
-                    Industry.CreateRaw(50, Constants.Grain, 2, 0.125),
-                    Industry.CreateRaw(50, Constants.Wood, 2, 0.05),
-                    Industry.CreateRaw(50, Constants.Wood, 2, 0.05),
-                    Industry.CreateRaw(50, Constants.Wood, 2, 0.05),
-                    Industry.CreateRaw(50, Constants.Wood, 2, 0.05),
+                    Industry.Create(50, Constants.Recipes[Constants.Fruit], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Fruit], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Vegetables], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Vegetables], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Meat], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Meat], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Fish], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Fish], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Grain], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Wood], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Wood], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Wood], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Wood], 0.25),
 
                     //Industry.CreateRaw(50, Constants.Fish, 16, 0.25),
                     //Industry.CreateRaw(25, Constants.Grain, 16, 0.125),
 
-                    Industry.CreateSawmill(25),
-                    Industry.CreateBakery(25),
+                    Industry.Create(25, Constants.Recipes[Constants.Timber], 1.0),
+                    Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0),
                 },
-                Persons = Enumerable.Repeat(0, 500)
+                Persons = Enumerable.Repeat(0, 250)
                     .Select(_ => new Person())
                     .ToList(),
             };
 
             var records = new List<CsvRecord>();
 
-            for (var i=-100; i<2000; i++)
+            for (var i=-100; i<1200; i++)
             {
                 if (i%4 == 0 && 0 < i && i <= 1000)
                 {
@@ -79,59 +79,49 @@ namespace Laguna.Example.ConsoleApp
 
                 if (i == 100)
                 {
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Fish, 8, 0.25));
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Fish, 8, 0.25));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fish], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fish], 1.0));
                 }
                 else if (i == 200)
                 {
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Grain, 8, 0.125));
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Grain, 8, 0.125));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Grain], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Grain], 1.0));
                 } 
                 else if (i == 300)
                 {
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Fruit, 8, 0.125));
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Fruit, 8, 0.125));
-                    province.Industries.Add(Industry.CreateBakery(20));
-                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fruit], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fruit], 1.0));
+                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
                 }
                 else if (i == 350)
                 {
-                    province.Industries.Add(Industry.CreateBakery(20));
-                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
                 }
                 else if (i == 400) 
                 {
-                    province.Industries.Add(Industry.CreateBakery(20));
-                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
                 } 
                 else if (i == 450)
                 {
-                    province.Industries.Add(Industry.CreateBakery(20));
-                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
                 }
                 else if (i == 500) 
                 {
-                    province.Industries.Add(Industry.CreateBakery(20));
-                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
                 } 
                 else if (i == 550) 
                 {
-                    province.Industries.Add(Industry.CreateBakery(20));
-                    province.Industries.Add(Industry.CreateBakery(20));
+                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
                 } 
                 else if (i == 600)
                 {
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Wood, 8, 0.05));
-                    province.Industries.Add(Industry.CreateRaw(50, Constants.Wood, 8, 0.05));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
                 }
-                else if (i == 1400)
+                else if (i == 900)
                 {
-                    province.Industries.Add(Industry.CreateSawmill(20));
-                    province.Industries.Add(Industry.CreateSawmill(20));
-                    province.Industries.Add(Industry.CreateSawmill(20));
-                    province.Industries.Add(Industry.CreateSawmill(20));
-                    province.Industries.Add(Industry.CreateSawmill(20));
-                    province.Industries.Add(Industry.CreateSawmill(20));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Timber], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Timber], 1.0));
                 }
 
                 province.Step();
@@ -192,7 +182,12 @@ namespace Laguna.Example.ConsoleApp
 
             { }
 
-            using (var writer = new StreamWriter("output.csv"))
+            var filePath = string.Format(
+                "output_{0}.csv",
+                DateTime.Now.ToString("yyyyMMdd_HHmmss")
+            );
+
+            using (var writer = new StreamWriter(filePath))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 csv.WriteRecords(records);

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Laguna.Agent
 {
     public class Inventory 
     {
+
+        public IEnumerable<string> Keys => inventory.Keys.AsEnumerable();
 
         private Dictionary<string, double> inventory { get; set; } = new Dictionary<string, double>();
 

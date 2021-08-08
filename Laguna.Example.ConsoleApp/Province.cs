@@ -25,35 +25,34 @@ namespace Laguna.Example.ConsoleApp
             foreach (var person in this.Persons)
             {
                 person.Step();
+                this.ApplySpoilRate(person.Inventory);
             }
 
             foreach (var industry in this.Industries)
             {
                 industry.Step();
+                this.ApplySpoilRate(industry.Inventory);
             }
 
             this.StepMarket();
 
-            var tax = 0.0;
-            foreach (var industry in this.Industries)
-            {
-                var ceiling = 15000;
+            this.TaxIndustries();
+        }
 
-                var money = industry.Inventory.Get(Constants.Money);
-                if (ceiling < money)
+        private void ApplySpoilRate(Inventory inventory)
+        {
+            foreach (var commodity in inventory.Keys.ToList())
+            {
+                if (commodity == Constants.Money)
                 {
-                    var ratio = Math.Min(1.0, (money - ceiling) / 10000.0);
-                    var amount = ratio * (money - ceiling);
-
-                    tax += amount;
-                    industry.Inventory.Add(Constants.Money, -amount);
+                    continue;
                 }
-            }
 
-            var credit = tax / this.Persons.Count;
-            foreach (var person in this.Persons)
-            {
-                person.Inventory.Add(Constants.Money, credit);
+                var spoilRate = Constants.Commodities[commodity].SpoilRate;
+                inventory.Set(
+                    commodity,
+                    (1 - spoilRate) * inventory.Get(commodity)
+                );
             }
         }
 
@@ -86,5 +85,31 @@ namespace Laguna.Example.ConsoleApp
                 pair.Key.HandleOfferResults(pair.Value);
             }
         }
+
+        private void TaxIndustries()
+        {
+            var tax = 0.0;
+            foreach (var industry in this.Industries)
+            {
+                var ceiling = 15000;
+
+                var money = industry.Inventory.Get(Constants.Money);
+                if (ceiling < money)
+                {
+                    var ratio = Math.Min(1.0, (money - ceiling) / 10000.0);
+                    var amount = ratio * (money - ceiling);
+
+                    tax += amount;
+                    industry.Inventory.Add(Constants.Money, -amount);
+                }
+            }
+
+            var credit = tax / this.Persons.Count;
+            foreach (var person in this.Persons)
+            {
+                person.Inventory.Add(Constants.Money, credit);
+            }
+        }
+
     }
 }
