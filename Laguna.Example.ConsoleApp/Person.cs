@@ -24,6 +24,15 @@ namespace Laguna.Example.ConsoleApp
             0.10
         );
 
+        public WeightedDemand AlcoholDemand = new WeightedDemand(
+            new Dictionary<string, double>
+            {
+                { Constants.Wine, 1 },
+                { Constants.Beer, 1 },
+            },
+            0.25
+        );
+
         private double Nutrition = 0;
 
         public Person()
@@ -65,14 +74,32 @@ namespace Laguna.Example.ConsoleApp
                 this.CostBeliefs.Consume(Constants.Wood, 0.5);
             }
 
-            if (0 < this.Inventory.Get(Constants.Timber))
+            if (1 < this.Inventory.Get(Constants.Wood))
             {
+                this.Inventory.Set(
+                    Constants.Clothes,
+                    Math.Max(0, this.Inventory.Get(Constants.Clothes) - 0.05)
+                );
+                this.CostBeliefs.Consume(Constants.Clothes, 0.25);
+
                 this.Inventory.Set(
                     Constants.Timber,
                     Math.Max(0, this.Inventory.Get(Constants.Timber) - 0.25)
                 );
                 this.CostBeliefs.Consume(Constants.Timber, 0.25);
+
+                var alcoholDemand = this.AlcoholDemand.GetDemand(this.PriceBeliefs, 0.5);
+                foreach (var pair in alcoholDemand)
+                {
+                    var (commodity, amount) = (pair.Key, pair.Value);
+
+                    this.Inventory.Set(
+                        commodity,
+                        Math.Max(0, this.Inventory.Get(commodity) - amount)
+                    );
+                }
             }
+
 
             this.CostBeliefs.End();
         }
@@ -98,17 +125,30 @@ namespace Laguna.Example.ConsoleApp
                 OfferType.Buy,
                 Constants.Wood,
                 this.PriceBeliefs.GetRandom(Constants.Wood),
-                Math.Max(0, Math.Min(4 - this.Inventory.Get(Constants.Wood), 2))
+                Math.Clamp(4 - this.Inventory.Get(Constants.Wood), 0, 2)
             ));
 
             if (0.8 < this.Nutrition && 1 < this.Inventory.Get(Constants.Wood))
             {
                 buyOffers.Add(new Offer(
                     OfferType.Buy,
+                    Constants.Clothes,
+                    this.PriceBeliefs.GetRandom(Constants.Clothes),
+                    Math.Clamp(1 - this.Inventory.Get(Constants.Clothes), 0, 1)
+                ));
+
+                buyOffers.Add(new Offer(
+                    OfferType.Buy,
                     Constants.Timber,
                     this.PriceBeliefs.GetRandom(Constants.Timber),
-                    Math.Max(0, Math.Min(5 - this.Inventory.Get(Constants.Timber), 2))
+                    Math.Clamp(5 - this.Inventory.Get(Constants.Timber), 0, 2)
                 ));
+
+                var alcoholOffers = this.AlcoholDemand.GenerateOffers(this.Inventory, this.PriceBeliefs, 2);
+                foreach (var offer in alcoholOffers)
+                {
+                    buyOffers.Add(offer);
+                }
             }
 
             var money = this.Inventory.Get(Constants.Money);

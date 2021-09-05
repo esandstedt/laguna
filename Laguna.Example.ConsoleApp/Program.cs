@@ -21,6 +21,10 @@ namespace Laguna.Example.ConsoleApp
         public double BreadSupply { get; set; }
         public double BreadTraded { get; set; }
         public double BreadPrice { get; set; }
+        public double FruitDemand { get; set; }
+        public double FruitSupply { get; set; }
+        public double FruitTraded { get; set; }
+        public double FruitPrice { get; set; }
         public double FishDemand { get; set; }
         public double FishSupply { get; set; }
         public double FishTraded { get; set; }
@@ -33,6 +37,14 @@ namespace Laguna.Example.ConsoleApp
         public double TimberSupply { get; set; }
         public double TimberTraded { get; set; }
         public double TimberPrice { get; set; }
+        public double BarrelDemand { get; set; }
+        public double BarrelSupply { get; set; }
+        public double BarrelTraded { get; set; }
+        public double BarrelPrice { get; set; }
+        public double WineDemand { get; set; }
+        public double WineSupply { get; set; }
+        public double WineTraded { get; set; }
+        public double WinePrice { get; set; }
     }
 
     public class Program
@@ -62,6 +74,17 @@ namespace Laguna.Example.ConsoleApp
 
                     Industry.Create(25, Constants.Recipes[Constants.Timber], 1.0),
                     Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0),
+
+                    Industry.Create(50, Constants.Recipes[Constants.Hops], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Hops], 0.25),
+                    Industry.Create(25, Constants.Recipes[Constants.Beer], 1.0),
+                    Industry.Create(25, Constants.Recipes[Constants.Wine], 1.0),
+                    Industry.Create(25, Constants.Recipes[Constants.Barrel], 1.0),
+                    Industry.Create(25, Constants.Recipes[Constants.Furniture], 1.0),
+                    Industry.Create(50, Constants.Recipes[Constants.Cotton], 0.25),
+                    Industry.Create(50, Constants.Recipes[Constants.Cotton], 0.25),
+                    Industry.Create(25, Constants.Recipes[Constants.Fabric], 1.0),
+                    Industry.Create(25, Constants.Recipes[Constants.Clothes], 1.0),
                 },
                 Persons = Enumerable.Repeat(0, 250)
                     .Select(_ => new Person())
@@ -81,16 +104,17 @@ namespace Laguna.Example.ConsoleApp
                 {
                     province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fish], 1.0));
                     province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fish], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Grain], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Grain], 1.0));
                 }
                 else if (i == 200)
                 {
-                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Grain], 1.0));
-                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Grain], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fruit], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fruit], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Bread], 1.0));
                 } 
                 else if (i == 300)
                 {
-                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fruit], 1.0));
-                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Fruit], 1.0));
                     province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
                 }
                 else if (i == 350)
@@ -100,6 +124,10 @@ namespace Laguna.Example.ConsoleApp
                 else if (i == 400) 
                 {
                     province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
                 } 
                 else if (i == 450)
                 {
@@ -107,21 +135,31 @@ namespace Laguna.Example.ConsoleApp
                 }
                 else if (i == 500) 
                 {
-                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Timber], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Timber], 1.0));
                 } 
                 else if (i == 550) 
                 {
-                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Bread], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
+                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
                 } 
                 else if (i == 600)
                 {
-                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
-                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Wood], 1.0));
+                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Beer], 1.0));
+                    province.Industries.Add(Industry.Create(25, Constants.Recipes[Constants.Wine], 1.0));
                 }
                 else if (i == 900)
                 {
-                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Timber], 1.0));
-                    province.Industries.Add(Industry.Create(50, Constants.Recipes[Constants.Timber], 1.0));
+                    var diffs = province.Market.History
+                        .Select(x => new
+                        {
+                            Commodity = x.Key,
+                            Diff = x.Value.AmountToBuy - x.Value.AmountToSell
+                        })
+                        .OrderByDescending(x => x.Diff)
+                        .ToList();
+
+                    { }
                 }
 
                 province.Step();
@@ -129,20 +167,27 @@ namespace Laguna.Example.ConsoleApp
                 var unskilledWork = province.Market.History.GetValueOrDefault(Constants.UnskilledWork);
                 var grain = province.Market.History.GetValueOrDefault(Constants.Grain);
                 var bread = province.Market.History.GetValueOrDefault(Constants.Bread);
+                var fruit = province.Market.History.GetValueOrDefault(Constants.Fruit);
                 var fish = province.Market.History.GetValueOrDefault(Constants.Fish);
                 var wood = province.Market.History.GetValueOrDefault(Constants.Wood);
                 var timber = province.Market.History.GetValueOrDefault(Constants.Timber);
+                var barrel = province.Market.History.GetValueOrDefault(Constants.Barrel);
+
+                var hops = province.Market.History.GetValueOrDefault(Constants.Hops);
+                var beer = province.Market.History.GetValueOrDefault(Constants.Beer);
+                var wine = province.Market.History.GetValueOrDefault(Constants.Wine);
+                var clothes = province.Market.History.GetValueOrDefault(Constants.Clothes);
 
                 Console.WriteLine(
                     "{0,5} {1,5:N0} || {2} || {3} || {4} || {5} || {6} || {7}",
                     i,
                     province.Persons.Count,
                     string.Format("{0,6:N0} {1,6:F2}", unskilledWork.AmountTraded, unskilledWork.AveragePrice),
-                    string.Format("{0,6:N0} {1,6:F2}", grain.AmountTraded, grain.AveragePrice),
-                    string.Format("{0,6:N0} {1,6:F2}", bread.AmountTraded, bread.AveragePrice),
-                    string.Format("{0,6:N0} {1,6:F2}", fish.AmountTraded, fish.AveragePrice),
-                    string.Format("{0,6:N0} {1,6:F2}", wood.AmountTraded, wood.AveragePrice),
-                    string.Format("{0,6:N0} {1,6:F2}", timber?.AmountTraded, timber?.AveragePrice)
+                    string.Format("{0,6:N0} {1,6:F2}", hops.AmountTraded, beer.AveragePrice),
+                    string.Format("{0,6:N0} {1,6:F2}", beer.AmountTraded, beer.AveragePrice),
+                    string.Format("{0,6:N0} {1,6:F2}", fruit.AmountTraded, beer.AveragePrice),
+                    string.Format("{0,6:N0} {1,6:F2}", wine.AmountTraded, wine.AveragePrice),
+                    string.Format("{0,6:N0} {1,6:F2}", clothes.AmountTraded, clothes.AveragePrice)
                 );
 
                 if (0 <= i)
@@ -161,6 +206,10 @@ namespace Laguna.Example.ConsoleApp
                         BreadSupply = bread.AmountToSell,
                         BreadTraded = bread.AmountTraded,
                         BreadPrice = bread.AveragePrice,
+                        FruitDemand = fruit.AmountToBuy,
+                        FruitSupply = fruit.AmountToSell,
+                        FruitTraded = fruit.AmountTraded,
+                        FruitPrice = fruit.AveragePrice,
                         FishDemand = fish.AmountToBuy,
                         FishSupply = fish.AmountToSell,
                         FishTraded = fish.AmountTraded,
@@ -173,6 +222,14 @@ namespace Laguna.Example.ConsoleApp
                         TimberSupply = timber.AmountToSell,
                         TimberTraded = timber.AmountTraded,
                         TimberPrice = timber.AveragePrice,
+                        BarrelDemand = barrel.AmountToBuy,
+                        BarrelSupply = barrel.AmountToSell,
+                        BarrelTraded = barrel.AmountTraded,
+                        BarrelPrice = barrel.AveragePrice,
+                        WineDemand = wine.AmountToBuy,
+                        WineSupply = wine.AmountToSell,
+                        WineTraded = wine.AmountTraded,
+                        WinePrice = wine.AveragePrice,
                     });
                 }
             }
