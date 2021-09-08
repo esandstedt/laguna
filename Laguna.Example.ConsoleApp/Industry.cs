@@ -11,32 +11,27 @@ namespace Laguna.Example.ConsoleApp
     public class IndustryOptions
     {
         public double WorkCapacity { get; set; }
-        public List<(string Commodity, double Amount)> Consumes { get; set; }
-        public string Produces { get; set; }
+        public Recipe Recipe { get; set; }
         public double Efficiency { get; set; }
     }
 
     public class Industry : Agent
     {
         public CostBeliefs CostBeliefs { get; set; }
-        //public IndustryOptions Options { get; set; }
         public Dictionary<string, double> Sales { get; set; }
 
-        private readonly List<(string Commodity, double Amount)> consumes;
-        private readonly string produces;
+        private Recipe recipe;
         private readonly double capacity;
+        private readonly double efficiency;
 
         public Industry(IndustryOptions options)
         {
             this.CostBeliefs = new CostBeliefs(this.PriceBeliefs);
-            //this.Options = options;
             this.Sales = new Dictionary<string, double>();
 
-            this.consumes = options.Consumes
-                .Select(x => (x.Commodity, x.Amount / options.Efficiency))
-                .ToList();
-            this.produces = options.Produces;
-            this.capacity = options.WorkCapacity / this.consumes.Single(x => x.Commodity == Constants.UnskilledWork).Amount;
+            this.recipe = options.Recipe;
+            this.capacity = options.WorkCapacity;
+            this.efficiency = options.Efficiency;
 
             this.Inventory.Add(Constants.Money, 1000);
         }
@@ -45,7 +40,7 @@ namespace Laguna.Example.ConsoleApp
         {
             // Figure out how many "units" are produced
             var units = double.MaxValue;
-            foreach (var consume in this.consumes)
+            foreach (var consume in this.recipe.Consumes)
             {
                 units = Math.Min(
                     units,
@@ -53,15 +48,15 @@ namespace Laguna.Example.ConsoleApp
                 );
             }
 
-            var soldUnits = this.Sales.GetValueOrDefault(this.produces, 0) ;
-            var heldUnits = this.Inventory.Get(this.produces);
+            var soldUnits = this.Sales.GetValueOrDefault(this.recipe.Produces, 0) ;
+            var heldUnits = this.Inventory.Get(this.recipe.Produces);
 
             units = Math.Min(units, Math.Max(2 * soldUnits - heldUnits, 0));
 
             // Produce
             this.CostBeliefs.Begin();
 
-            foreach (var consume in this.consumes)
+            foreach (var consume in this.recipe.Consumes)
             {
                 var amount = units * consume.Amount;
                 this.CostBeliefs.Consume(consume.Commodity, amount);
@@ -69,8 +64,9 @@ namespace Laguna.Example.ConsoleApp
             }
 
             {
-                this.CostBeliefs.Produce(this.produces, units);
-                this.Inventory.Add(this.produces, units);
+                var amount = units * this.efficiency;
+                this.CostBeliefs.Produce(this.recipe.Produces, amount);
+                this.Inventory.Add(this.recipe.Produces, amount);
             }
 
             this.CostBeliefs.End();
@@ -78,7 +74,7 @@ namespace Laguna.Example.ConsoleApp
             // Ensure there's always something being produced
             if (units < 1)
             {
-                this.Inventory.Add(this.produces, 1);
+                this.Inventory.Add(this.recipe.Produces, this.efficiency);
             }
 
             // Throw all unused work away
@@ -90,8 +86,8 @@ namespace Laguna.Example.ConsoleApp
             {
                 var offers = this.CreateOffers(
                     OfferType.Sell,
-                    this.produces,
-                    this.Inventory.Get(this.produces)
+                    this.recipe.Produces,
+                    this.Inventory.Get(this.recipe.Produces)
                 );
 
                 foreach (var offer in offers)
@@ -103,7 +99,7 @@ namespace Laguna.Example.ConsoleApp
             {
                 var offers = new List<Offer>();
 
-                foreach (var consume in this.consumes)
+                foreach (var consume in this.recipe.Consumes)
                 {
                     offers.AddRange(this.CreateOffers(
                         OfferType.Buy,
@@ -154,8 +150,7 @@ namespace Laguna.Example.ConsoleApp
                 new IndustryOptions
                 {
                     WorkCapacity = workCapacity,
-                    Consumes = recipe.Consumes,
-                    Produces = recipe.Produces,
+                    Recipe = recipe,
                     Efficiency = efficiency
                 }
             );
