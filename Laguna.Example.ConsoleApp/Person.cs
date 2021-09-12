@@ -21,7 +21,7 @@ namespace Laguna.Example.ConsoleApp
                 { Constants.Grain, 1 },
                 { Constants.Bread, 5 },
             },
-            0.10
+            0.05
         );
 
         public WeightedDemand AlcoholDemand = new WeightedDemand(

@@ -11,8 +11,9 @@ namespace Laguna.Example.ConsoleApp
     public class IndustryOptions
     {
         public double WorkCapacity { get; set; }
-        public Recipe Recipe { get; set; }
+        public List<Recipe> Recipes { get; set; }
         public double Efficiency { get; set; }
+        public bool Debug { get; set; }
     }
 
     public class Industry : Agent
@@ -20,74 +21,142 @@ namespace Laguna.Example.ConsoleApp
         public CostBeliefs CostBeliefs { get; set; }
         public Dictionary<string, double> Sales { get; set; }
 
-        private Recipe recipe;
+        private List<Recipe> recipes;
         private readonly double capacity;
         private readonly double efficiency;
+        private readonly bool debug;
+
+        private Dictionary<Recipe, double> produces;
+        private Dictionary<string, double> consumes;
 
         public Industry(IndustryOptions options)
         {
             this.CostBeliefs = new CostBeliefs(this.PriceBeliefs);
             this.Sales = new Dictionary<string, double>();
 
-            this.recipe = options.Recipe;
+            this.recipes = options.Recipes;
             this.capacity = options.WorkCapacity;
             this.efficiency = options.Efficiency;
+            this.debug = options.Debug;
+
+            this.produces = new Dictionary<Recipe, double>();
+            this.consumes = new Dictionary<string, double>();
 
             this.Inventory.Add(Constants.Money, 1000);
         }
 
+
         public void Step()
         {
-            // Figure out how many "units" are produced
-            var units = double.MaxValue;
-            foreach (var consume in this.recipe.Consumes)
+            if (this.debug)
             {
-                units = Math.Min(
-                    units,
-                    this.Inventory.Get(consume.Commodity) / consume.Amount
-                );
+                { }
             }
-
-            var soldUnits = this.Sales.GetValueOrDefault(this.recipe.Produces, 0) ;
-            var heldUnits = this.Inventory.Get(this.recipe.Produces);
-
-            units = Math.Min(units, Math.Max(2 * soldUnits - heldUnits, 0));
 
             // Produce
-            this.CostBeliefs.Begin();
 
-            foreach (var consume in this.recipe.Consumes)
+            var producedUnits = new Dictionary<string, double>();
+            foreach (var x in this.recipes)
             {
-                var amount = units * consume.Amount;
-                this.CostBeliefs.Consume(consume.Commodity, amount);
-                this.Inventory.Remove(consume.Commodity, amount);
+                producedUnits[x.Produces] = 0;
             }
 
+            foreach (var produces in this.produces)
             {
-                var amount = units * this.efficiency;
-                this.CostBeliefs.Produce(this.recipe.Produces, amount);
-                this.Inventory.Add(this.recipe.Produces, amount);
-            }
+                var recipe = produces.Key;
 
-            this.CostBeliefs.End();
+                var units = produces.Value;
+                foreach (var consume in recipe.Consumes)
+                {
+                    units = Math.Min(
+                        units,
+                        this.Inventory.Get(consume.Commodity) / consume.Amount
+                    );
+                }
 
-            // Ensure there's always something being produced
-            if (units < 1)
-            {
-                this.Inventory.Add(this.recipe.Produces, this.efficiency);
+                this.CostBeliefs.Begin();
+
+                foreach (var consume in recipe.Consumes)
+                {
+                    var amount = units * consume.Amount;
+                    this.CostBeliefs.Consume(consume.Commodity, amount);
+                    this.Inventory.Remove(consume.Commodity, amount);
+                }
+
+                {
+                    var amount = units * this.efficiency;
+                    this.CostBeliefs.Produce(recipe.Produces, amount);
+                    this.Inventory.Add(recipe.Produces, amount);
+
+                    producedUnits[recipe.Produces] += amount;
+                }
+
+                this.CostBeliefs.End();
             }
 
             // Throw all unused work away
             this.Inventory.Set(Constants.UnskilledWork, 0);
+
+            this.UpdateStrategy(producedUnits);
+        }
+
+        private void UpdateStrategy(Dictionary<string, double> producedUnits)
+        {
+            // Determine what to stock and in what quantities.
+            var goal = this.recipes
+                .Select(recipe =>
+                {
+                    var sales = this.Sales.GetValueOrDefault(recipe.Produces, 0);
+                    var amount = Math.Max(1, 1.25 * sales);
+                    return (recipe, amount);
+                })
+                .ToDictionary(x => x.Item1, x => x.Item2);
+
+            // Determine what to produce to meet the goal.
+            var produces = goal
+                .Select(pair =>
+                {
+                    var recipe = pair.Key;
+                    var amount = pair.Value;
+
+                    var diff = amount - (this.Inventory.Get(recipe.Produces) - producedUnits[recipe.Produces]); 
+
+                    return (recipe, Math.Max(0, diff));
+                })
+                .ToDictionary(x => x.Item1, x => x.Item2);
+
+            // Restrict production to within capacity.
+            var ratio = Math.Min(1.0, this.capacity / produces.Sum(x => x.Value));
+            this.produces = produces
+                .ToDictionary(x => x.Key, x => ratio * x.Value);
+
+            // Determine what is needed to satisfy production.
+            this.consumes = this.produces
+                .SelectMany(x =>x.Key.Consumes.Select(y => (y.Commodity, x.Value * y.Amount)))
+                .GroupBy(x => x.Item1)
+                .Select(g =>
+                {
+                    var amount = 1.25 * g.Sum(x => x.Item2);
+                    var diff = amount - this.Inventory.Get(g.Key);
+
+                    return (g.Key, Math.Max(0, diff));
+                })
+                .ToDictionary(x => x.Item1, x => x.Item2);
+
+            if (this.debug)
+            {
+                { }
+            }
         }
 
         public override IEnumerable<Offer> CreateOffers()
         {
-            {
+            foreach (var recipe in this.recipes) 
+            { 
                 var offers = this.CreateOffers(
                     OfferType.Sell,
-                    this.recipe.Produces,
-                    this.Inventory.Get(this.recipe.Produces)
+                    recipe.Produces,
+                    this.Inventory.Get(recipe.Produces)
                 );
 
                 foreach (var offer in offers)
@@ -99,12 +168,15 @@ namespace Laguna.Example.ConsoleApp
             {
                 var offers = new List<Offer>();
 
-                foreach (var consume in this.recipe.Consumes)
+                foreach (var consume in this.consumes)
                 {
+                    var commodity = consume.Key;
+                    var amount = consume.Value;
+
                     offers.AddRange(this.CreateOffers(
                         OfferType.Buy,
-                        consume.Commodity,
-                        this.capacity * consume.Amount
+                        consume.Key,
+                        consume.Value
                     ));
                 }
 
@@ -143,15 +215,17 @@ namespace Laguna.Example.ConsoleApp
 
         public static Industry Create(
             double workCapacity,
-            Recipe recipe,
-            double efficiency)
+            List<Recipe> recipes,
+            double efficiency,
+            bool debug = false)
         {
             return new Industry(
                 new IndustryOptions
                 {
                     WorkCapacity = workCapacity,
-                    Recipe = recipe,
-                    Efficiency = efficiency
+                    Recipes = recipes,
+                    Efficiency = efficiency,
+                    Debug = debug
                 }
             );
         }
