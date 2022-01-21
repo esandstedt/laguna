@@ -13,18 +13,14 @@ namespace Laguna.Example.ConsoleApp
         public double WorkSupply { get; set; }
         public double WorkTraded { get; set; }
         public double WorkPrice { get; set; }
-        public double GrainDemand { get; set; }
-        public double GrainSupply { get; set; }
-        public double GrainTraded { get; set; }
-        public double GrainPrice { get; set; }
-        public double BreadDemand { get; set; }
-        public double BreadSupply { get; set; }
-        public double BreadTraded { get; set; }
-        public double BreadPrice { get; set; }
-        public double VegetablesDemand { get; set; }
-        public double VegetablesSupply { get; set; }
-        public double VegetablesTraded { get; set; }
-        public double VegetablesPrice { get; set; }
+        public double RawFoodDemand { get; set; }
+        public double RawFoodSupply { get; set; }
+        public double RawFoodTraded { get; set; }
+        public double RawFoodPrice { get; set; }
+        public double FoodDemand { get; set; }
+        public double FoodSupply { get; set; }
+        public double FoodTraded { get; set; }
+        public double FoodPrice { get; set; }
     }
 
     public class Program
@@ -39,16 +35,15 @@ namespace Laguna.Example.ConsoleApp
                         100,
                         new List<Recipe>
                         {
-                            Constants.Recipes[Constants.Grain],
-                            Constants.Recipes[Constants.Vegetables]
+                            Constants.Recipes[Constants.RawFood],
                         }, 
                         1.0
                     ),
                     Industry.Create(
-                        20,
+                        100,
                         new List<Recipe>
                         {
-                            Constants.Recipes[Constants.Bread],
+                            Constants.Recipes[Constants.Food],
                         }, 
                         1.0
                     ),
@@ -64,28 +59,22 @@ namespace Laguna.Example.ConsoleApp
             {
                 province.Step();
 
-                var unskilledWork = province.Market.History.GetValueOrDefault(Constants.UnskilledWork);
-                var grain = province.Market.History.GetValueOrDefault(Constants.Grain);
-                var bread = province.Market.History.GetValueOrDefault(Constants.Bread);
-                var vegetables = province.Market.History.GetValueOrDefault(Constants.Vegetables);
-                var fish = province.Market.History.GetValueOrDefault(Constants.Fish);
-                var wood = province.Market.History.GetValueOrDefault(Constants.Wood);
-                var timber = province.Market.History.GetValueOrDefault(Constants.Timber);
-                var barrel = province.Market.History.GetValueOrDefault(Constants.Barrel);
+                if (0 <= i)
+                {
+                    province.Persons.Add(new Person());
+                }
 
-                var hops = province.Market.History.GetValueOrDefault(Constants.Hops);
-                var beer = province.Market.History.GetValueOrDefault(Constants.Beer);
-                var wine = province.Market.History.GetValueOrDefault(Constants.Wine);
-                var clothes = province.Market.History.GetValueOrDefault(Constants.Clothes);
+                var unskilledWork = province.Market.History.GetValueOrDefault(Constants.UnskilledWork);
+                var rawFood = province.Market.History.GetValueOrDefault(Constants.RawFood);
+                var food = province.Market.History.GetValueOrDefault(Constants.Food);
 
                 Console.WriteLine(
-                    "{0,5} {1,5:N0} || {2} || {3} || {4} || {5}",
+                    "{0,5} {1,5:N0} || {2} || {3} || {4}",
                     i,
                     province.Persons.Count,
                     string.Format("{0,6:N0} {1,6:F2}", unskilledWork.AmountTraded, unskilledWork.AveragePrice),
-                    string.Format("{0,6:N0} {1,6:F2}", grain.AmountTraded, grain.AveragePrice),
-                    string.Format("{0,6:N0} {1,6:F2}", bread.AmountTraded, bread.AveragePrice),
-                    string.Format("{0,6:N0} {1,6:F2}", vegetables.AmountTraded, vegetables.AveragePrice)
+                    string.Format("{0,6:N0} {1,6:F2}", rawFood.AmountTraded, rawFood.AveragePrice),
+                    string.Format("{0,6:N0} {1,6:F2}", food.AmountTraded, food.AveragePrice)
                 );
 
                 if (0 <= i)
@@ -96,18 +85,14 @@ namespace Laguna.Example.ConsoleApp
                         WorkSupply = unskilledWork.AmountToSell,
                         WorkTraded = unskilledWork.AmountTraded,
                         WorkPrice = unskilledWork.AveragePrice,
-                        GrainDemand = grain.AmountToBuy,
-                        GrainSupply = grain.AmountToSell,
-                        GrainTraded = grain.AmountTraded,
-                        GrainPrice = grain.AveragePrice,
-                        BreadDemand = bread.AmountToBuy,
-                        BreadSupply = bread.AmountToSell,
-                        BreadTraded = bread.AmountTraded,
-                        BreadPrice = bread.AveragePrice,
-                        VegetablesDemand = vegetables.AmountToBuy,
-                        VegetablesSupply = vegetables.AmountToSell,
-                        VegetablesTraded = vegetables.AmountTraded,
-                        VegetablesPrice = vegetables.AveragePrice,
+                        RawFoodDemand = rawFood.AmountToBuy,
+                        RawFoodSupply = rawFood.AmountToSell,
+                        RawFoodTraded = rawFood.AmountTraded,
+                        RawFoodPrice = rawFood.AveragePrice,
+                        FoodDemand = food.AmountToBuy,
+                        FoodSupply = food.AmountToSell,
+                        FoodTraded = food.AmountTraded,
+                        FoodPrice = food.AveragePrice,
                     });
                 }
             }

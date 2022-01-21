@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30011.22
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bazaar", "Bazaar\Bazaar.csproj", "{65CD5BFD-27D5-4C82-A6C0-19587C66D897}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -15,9 +15,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bazaar.Example.ConsoleApp",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Laguna.Market", "Laguna.Market\Laguna.Market.csproj", "{6B50413B-A90F-4205-9F0C-DBDC185F293C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Laguna.Agent", "Laguna.Agent\Laguna.Agent.csproj", "{F5A28B27-6BE9-4805-AF75-E5AFC6CB8FE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Laguna.Agent", "Laguna.Agent\Laguna.Agent.csproj", "{F5A28B27-6BE9-4805-AF75-E5AFC6CB8FE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Laguna.Example.ConsoleApp", "Laguna.Example.ConsoleApp\Laguna.Example.ConsoleApp.csproj", "{0BC6A054-F747-4434-8E68-C5733D721BED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Laguna.Example.ConsoleApp", "Laguna.Example.ConsoleApp\Laguna.Example.ConsoleApp.csproj", "{0BC6A054-F747-4434-8E68-C5733D721BED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Laguna.Market.Tests", "Laguna.Market.Tests\Laguna.Market.Tests.csproj", "{26C45D3B-88CF-4F51-88B2-80308D291539}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Laguna.Agent.Tests", "Laguna.Agent.Tests\Laguna.Agent.Tests.csproj", "{D4988C0B-9C7F-4FC4-BD98-77499E017DE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,14 @@ Global
 		{0BC6A054-F747-4434-8E68-C5733D721BED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BC6A054-F747-4434-8E68-C5733D721BED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BC6A054-F747-4434-8E68-C5733D721BED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26C45D3B-88CF-4F51-88B2-80308D291539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26C45D3B-88CF-4F51-88B2-80308D291539}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26C45D3B-88CF-4F51-88B2-80308D291539}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26C45D3B-88CF-4F51-88B2-80308D291539}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4988C0B-9C7F-4FC4-BD98-77499E017DE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4988C0B-9C7F-4FC4-BD98-77499E017DE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4988C0B-9C7F-4FC4-BD98-77499E017DE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4988C0B-9C7F-4FC4-BD98-77499E017DE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

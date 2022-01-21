@@ -14,23 +14,10 @@ namespace Laguna.Example.ConsoleApp
         public WeightedDemand FoodDemand = new WeightedDemand(
             new Dictionary<string, double>
             {
-                { Constants.Fruit, 2 },
-                { Constants.Vegetables, 2 },
-                { Constants.Meat, 3 },
-                { Constants.Fish, 3 },
-                { Constants.Grain, 1 },
-                { Constants.Bread, 5 },
+                { Constants.RawFood, 1 },
+                { Constants.Food, 10 },
             },
             0.05
-        );
-
-        public WeightedDemand AlcoholDemand = new WeightedDemand(
-            new Dictionary<string, double>
-            {
-                { Constants.Wine, 1 },
-                { Constants.Beer, 1 },
-            },
-            0.25
         );
 
         private double Nutrition = 0;
@@ -74,34 +61,18 @@ namespace Laguna.Example.ConsoleApp
                 this.CostBeliefs.Consume(Constants.Wood, 0.5);
             }
 
-            if (1 < this.Inventory.Get(Constants.Wood))
+            var results = this.CostBeliefs.End();
+
+            foreach (var result in results)
             {
-                this.Inventory.Set(
-                    Constants.Clothes,
-                    Math.Max(0, this.Inventory.Get(Constants.Clothes) - 0.05)
+                var (minPrice, maxPrice) = this.PriceBeliefs.Get(result.Commodity);
+
+                this.PriceBeliefs.Set(
+                    result.Commodity,
+                    0.5 * minPrice + 0.5 * result.MinPrice,
+                    0.5 * maxPrice + 0.5 * result.MaxPrice
                 );
-                this.CostBeliefs.Consume(Constants.Clothes, 0.25);
-
-                this.Inventory.Set(
-                    Constants.Timber,
-                    Math.Max(0, this.Inventory.Get(Constants.Timber) - 0.25)
-                );
-                this.CostBeliefs.Consume(Constants.Timber, 0.25);
-
-                var alcoholDemand = this.AlcoholDemand.GetDemand(this.PriceBeliefs, 0.5);
-                foreach (var pair in alcoholDemand)
-                {
-                    var (commodity, amount) = (pair.Key, pair.Value);
-
-                    this.Inventory.Set(
-                        commodity,
-                        Math.Max(0, this.Inventory.Get(commodity) - amount)
-                    );
-                }
             }
-
-
-            this.CostBeliefs.End();
         }
 
         public override IEnumerable<Offer> CreateOffers()
@@ -127,29 +98,6 @@ namespace Laguna.Example.ConsoleApp
                 this.PriceBeliefs.GetRandom(Constants.Wood),
                 Math.Clamp(4 - this.Inventory.Get(Constants.Wood), 0, 2)
             ));
-
-            if (0.8 < this.Nutrition && 1 < this.Inventory.Get(Constants.Wood))
-            {
-                buyOffers.Add(new Offer(
-                    OfferType.Buy,
-                    Constants.Clothes,
-                    this.PriceBeliefs.GetRandom(Constants.Clothes),
-                    Math.Clamp(1 - this.Inventory.Get(Constants.Clothes), 0, 1)
-                ));
-
-                buyOffers.Add(new Offer(
-                    OfferType.Buy,
-                    Constants.Timber,
-                    this.PriceBeliefs.GetRandom(Constants.Timber),
-                    Math.Clamp(5 - this.Inventory.Get(Constants.Timber), 0, 2)
-                ));
-
-                var alcoholOffers = this.AlcoholDemand.GenerateOffers(this.Inventory, this.PriceBeliefs, 2);
-                foreach (var offer in alcoholOffers)
-                {
-                    buyOffers.Add(offer);
-                }
-            }
 
             var money = this.Inventory.Get(Constants.Money);
             foreach (var offer in buyOffers.SelectMany(x => x.Split(1)))

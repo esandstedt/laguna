@@ -91,7 +91,18 @@ namespace Laguna.Example.ConsoleApp
                     producedUnits[recipe.Produces] += amount;
                 }
 
-                this.CostBeliefs.End();
+                var results = this.CostBeliefs.End();
+
+                foreach (var result in results)
+                {
+                    var (minPrice, maxPrice) = this.PriceBeliefs.Get(result.Commodity);
+
+                    this.PriceBeliefs.Set(
+                        result.Commodity,
+                        0.5 * minPrice + 0.5 * result.MinPrice,
+                        0.5 * maxPrice + 0.5 * result.MaxPrice
+                    );
+                }
             }
 
             // Throw all unused work away
@@ -107,7 +118,7 @@ namespace Laguna.Example.ConsoleApp
                 .Select(recipe =>
                 {
                     var sales = this.Sales.GetValueOrDefault(recipe.Produces, 0);
-                    var amount = Math.Max(1, 1.25 * sales);
+                    var amount = Math.Max(1, 2 * sales);
                     return (recipe, amount);
                 })
                 .ToDictionary(x => x.Item1, x => x.Item2);
