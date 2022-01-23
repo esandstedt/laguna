@@ -38,12 +38,12 @@ namespace Laguna.Example.ConsoleApp
         {
             new RecipeBuilder(RawFood)
                 .Consumes(UnskilledWork, 1)
-                .Produces(RawFood, 4)
+                .Produces(RawFood, 1.5)
                 .Build(),
             new RecipeBuilder(Food)
                 .Consumes(UnskilledWork, 1)
                 .Consumes(RawFood, 1)
-                .Produces(Food, 2)
+                .Produces(Food, 1.5)
                 .Build(),
 
             new RecipeBuilder(Wood)

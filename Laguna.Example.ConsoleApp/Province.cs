@@ -91,7 +91,7 @@ namespace Laguna.Example.ConsoleApp
             var tax = 0.0;
             foreach (var industry in this.Industries)
             {
-                var ceiling = 5000;
+                var ceiling = 1000;
 
                 var money = industry.Inventory.Get(Constants.Money);
                 if (ceiling < money)

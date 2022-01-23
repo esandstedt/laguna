@@ -33,9 +33,11 @@ namespace Laguna.Agent
             this.unit = new Unit();
         }
 
-        public IEnumerable<CostBeliefResult> End()
+        public List<CostBeliefResult> End()
         {
             if (this.unit == null) throw new InvalidOperationException();
+
+            var result = new List<CostBeliefResult>();
 
             var produces = this.unit.Produces;
             var consumes = this.unit.Consumes
@@ -75,16 +77,18 @@ namespace Laguna.Agent
                 {
                     var (minPrice, maxPrice) = this.priceBeliefs.Get(commodity);
 
-                    yield return new CostBeliefResult
+                    result.Add(new CostBeliefResult
                     {
                         Commodity = commodity,
                         MinPrice = minRatio * minPrice,
                         MaxPrice = maxRatio * maxPrice,
-                    };
+                    });
                 }
             }
 
             this.unit = null;
+
+            return result;
         }
 
         public void Consume(string commodity, double amount)

@@ -32,7 +32,7 @@ namespace Laguna.Example.ConsoleApp
                 Industries = new List<Industry>()
                 {
                     Industry.Create(
-                        100,
+                        200,
                         new List<Recipe>
                         {
                             Constants.Recipes[Constants.RawFood],
@@ -48,19 +48,28 @@ namespace Laguna.Example.ConsoleApp
                         1.0
                     ),
                 },
-                Persons = Enumerable.Repeat(0, 250)
+                Persons = Enumerable.Repeat(0, 100)
                     .Select(_ => new Person())
                     .ToList(),
             };
 
             var records = new List<CsvRecord>();
 
-            for (var i=-100; i<1000; i++)
+            for (var i=-100; i<5000; i++)
             {
                 province.Step();
 
-                if (0 <= i)
+                if (0 <= i && i < 2000 && i%10 == 0)
                 {
+                    var persons = province.Persons
+                        .OrderByDescending(x => x.Inventory.Get(Constants.Money))
+                        .Take(10);
+                    foreach (var person in persons)
+                    {
+                        person.Inventory.Remove(Constants.Money, 10);
+                    }
+                        
+
                     province.Persons.Add(new Person());
                 }
 

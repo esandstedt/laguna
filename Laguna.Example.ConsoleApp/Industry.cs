@@ -99,8 +99,8 @@ namespace Laguna.Example.ConsoleApp
 
                     this.PriceBeliefs.Set(
                         result.Commodity,
-                        0.5 * minPrice + 0.5 * result.MinPrice,
-                        0.5 * maxPrice + 0.5 * result.MaxPrice
+                        0.75 * minPrice + 0.25 * Math.Max(minPrice, result.MinPrice),
+                        0.75 * maxPrice + 0.25 * Math.Max(maxPrice, result.MaxPrice)
                     );
                 }
             }

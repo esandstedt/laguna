@@ -33,9 +33,6 @@ namespace Laguna.Example.ConsoleApp
         {
             this.CostBeliefs.Begin();
 
-            this.Inventory.Set(Constants.UnskilledWork, 1);
-            this.CostBeliefs.Produce(Constants.UnskilledWork, 1);
-
             this.Nutrition = 0;
             var foodDemand = this.FoodDemand.GetDemand(this.PriceBeliefs, 1);
             foreach (var pair in foodDemand)
@@ -52,12 +49,20 @@ namespace Laguna.Example.ConsoleApp
                 this.Nutrition += amount;
             }
 
+            {
+                var amount = Math.Clamp(this.Nutrition, 0.5, 1);
+                this.Inventory.Set(Constants.UnskilledWork, amount);
+
+                this.CostBeliefs.Produce(Constants.UnskilledWork, 1);
+            }
+
             if (0 < this.Inventory.Get(Constants.Wood))
             {
                 this.Inventory.Set(
                     Constants.Wood,
                     Math.Max(0, this.Inventory.Get(Constants.Wood) - 0.5)
                 );
+
                 this.CostBeliefs.Consume(Constants.Wood, 0.5);
             }
 
@@ -69,8 +74,8 @@ namespace Laguna.Example.ConsoleApp
 
                 this.PriceBeliefs.Set(
                     result.Commodity,
-                    0.5 * minPrice + 0.5 * result.MinPrice,
-                    0.5 * maxPrice + 0.5 * result.MaxPrice
+                    0.995 * minPrice + 0.005 * Math.Max(minPrice, result.MinPrice),
+                    0.995 * maxPrice + 0.005 * Math.Max(maxPrice, result.MaxPrice)
                 );
             }
         }
