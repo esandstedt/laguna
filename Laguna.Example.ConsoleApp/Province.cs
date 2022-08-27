@@ -9,15 +9,31 @@ namespace Laguna.Example.ConsoleApp
 {
     public class Province
     {
-        public List<Industry> Industries { get; set; }
+        private List<Industry> industries = new List<Industry>();
+        private List<Person> persons = new List<Person>();
+
+        public IReadOnlyList<Industry> Industries => this.industries;
         public IMarket Market { get; set; }
-        public List<Person> Persons { get; set; }
+        public IReadOnlyList<Person> Persons => this.persons;
 
         public Province()
         {
-            this.Industries = new List<Industry>();
+            this.industries = new List<Industry>();
+            this.persons = new List<Person>();
+
             this.Market = new MarketImpl();
-            this.Persons = new List<Person>();
+        }
+
+        public void Add(Industry industry)
+        {
+            this.industries.Add(industry);
+            this.Market.Add(industry);
+        }
+
+        public void Add(Person person)
+        {
+            this.persons.Add(person);
+            this.Market.Add(person);
         }
 
         public void Step()
@@ -34,7 +50,7 @@ namespace Laguna.Example.ConsoleApp
                 this.ApplySpoilRate(industry.Inventory);
             }
 
-            this.StepMarket();
+            this.Market.Step();
 
             this.TaxIndustries();
         }
@@ -56,6 +72,7 @@ namespace Laguna.Example.ConsoleApp
             }
         }
 
+        /*
         private void StepMarket()
         {
             var agents = new List<IMarketAgent>()
@@ -85,6 +102,7 @@ namespace Laguna.Example.ConsoleApp
                 pair.Key.HandleOfferResults(pair.Value);
             }
         }
+         */
 
         private void TaxIndustries()
         {

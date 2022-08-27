@@ -8,21 +8,27 @@ namespace Laguna.Market
     public class MarketImpl : IMarket
     {
 
-        private readonly List<Offer> offers = new List<Offer>();
+        private readonly List<IMarketAgent> agents = new List<IMarketAgent>();
+
         public Dictionary<string, MarketHistory> History { get; set; } = new Dictionary<string, MarketHistory>();
 
-        public void AddOffer(Offer offer)
+        public void Add(IMarketAgent agent)
         {
-            if (offer == null) throw new ArgumentNullException(nameof(offer));
-
-            this.offers.Add(offer);
+            this.agents.Add(agent);
         }
 
-        public void ResolveOffers()
+        public void Remove(IMarketAgent agent)
         {
-            var amountRemaining = this.offers.ToDictionary(x => x, x => x.Amount);
+            this.agents.Remove(agent);
+        }
 
-            foreach (var group in this.offers.GroupBy(x => x.Commodity))
+        private static Dictionary<string, MarketHistory> Resolve(List<Offer> offers)
+        {
+            var history = new Dictionary<string, MarketHistory>();
+
+            var amountRemaining = offers.ToDictionary(x => x, x => x.Amount);
+
+            foreach (var group in offers.GroupBy(x => x.Commodity))
             {
                 var commodity = group.Key;
 
@@ -96,7 +102,7 @@ namespace Laguna.Market
 
                 var avgPrice = moneyTraded / amountTraded;
 
-                this.History[commodity] = new MarketHistory
+                history[commodity] = new MarketHistory
                 {
                     Commodity = commodity,
                     SuccessfulTrades = succesfulTrades,
@@ -113,7 +119,27 @@ namespace Laguna.Market
 
             }
 
-            this.offers.Clear();
+            return history;
+        }
+
+        public void Step()
+        {
+            var agentOffersMap = this.agents.ToDictionary(
+                x => x,
+                x => x.CreateOffers().ToList()
+            );
+
+            var offers = agentOffersMap.Values
+                .Cast<IEnumerable<Offer>>()
+                .Aggregate((a, b) => a.Concat(b))
+                .ToList();
+
+            this.History = Resolve(offers);
+
+            foreach (var pair in agentOffersMap)
+            {
+                pair.Key.HandleOfferResults(pair.Value);
+            }
         }
     }
 }

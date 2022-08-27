@@ -23,7 +23,7 @@ namespace Laguna.Market.Tests
             market.AddOffer(buy);
             market.AddOffer(sell);
 
-            market.ResolveOffers();
+            market.Step();
 
             Assert.AreEqual(1, buy.Results.Count);
             var buyResult = buy.Results.Single();
@@ -47,7 +47,7 @@ namespace Laguna.Market.Tests
             market.AddOffer(buy);
             market.AddOffer(sell);
 
-            market.ResolveOffers();
+            market.Step();
 
             Assert.AreEqual(1, buy.Results.Count);
             var buyResult = buy.Results.Single();
@@ -71,7 +71,7 @@ namespace Laguna.Market.Tests
             market.AddOffer(buy);
             market.AddOffer(sell);
 
-            market.ResolveOffers();
+            market.Step();
 
             Assert.AreEqual(1, buy.Results.Count);
             var buyResult = buy.Results.Single();
@@ -95,7 +95,7 @@ namespace Laguna.Market.Tests
             market.AddOffer(buy);
             market.AddOffer(sell);
 
-            market.ResolveOffers();
+            market.Step();
 
             Assert.AreEqual(0, buy.Results.Count);
             Assert.AreEqual(0, sell.Results.Count);
@@ -114,7 +114,7 @@ namespace Laguna.Market.Tests
             market.AddOffer(buy2);
             market.AddOffer(sell);
 
-            market.ResolveOffers();
+            market.Step();
 
             Assert.AreEqual(1, buy1.Results.Count);
             var buy1Result = buy1.Results.Single();
@@ -147,7 +147,7 @@ namespace Laguna.Market.Tests
             market.AddOffer(sell1);
             market.AddOffer(sell2);
 
-            market.ResolveOffers();
+            market.Step();
 
             Assert.AreEqual(2, buy.Results.Count);
             foreach (var result in buy.Results)

@@ -4,6 +4,12 @@ using System.Text;
 
 namespace Laguna.Market
 {
+    public enum OfferType
+    {
+        Buy,
+        Sell
+    }
+
     public class Offer
     {
         public OfferType Type { get; }
@@ -27,5 +33,4 @@ namespace Laguna.Market
         }
 
     }
-
 }

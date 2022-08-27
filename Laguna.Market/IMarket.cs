@@ -8,7 +8,9 @@ namespace Laguna.Market
     {
         Dictionary<string, MarketHistory> History { get; }
 
-        void AddOffer(Offer offer);
-        void ResolveOffers();
+        void Add(IMarketAgent agent);
+        void Remove(IMarketAgent agent);
+
+        void Step();
     }
 }

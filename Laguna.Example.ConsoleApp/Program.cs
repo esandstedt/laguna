@@ -27,31 +27,23 @@ namespace Laguna.Example.ConsoleApp
     {
         public static void Main(string[] args)
         {
-            var province = new Province()
+            var province = new Province(); 
+
+            province.Add(
+                Industry.Create(
+                    200,
+                    new List<Recipe>
+                    {
+                        Constants.Recipes[Constants.RawFood],
+                    },
+                    1.0
+                )
+            );
+
+            for (var i=0; i<100; i++)
             {
-                Industries = new List<Industry>()
-                {
-                    Industry.Create(
-                        200,
-                        new List<Recipe>
-                        {
-                            Constants.Recipes[Constants.RawFood],
-                        }, 
-                        1.0
-                    ),
-                    Industry.Create(
-                        100,
-                        new List<Recipe>
-                        {
-                            Constants.Recipes[Constants.Food],
-                        }, 
-                        1.0
-                    ),
-                },
-                Persons = Enumerable.Repeat(0, 100)
-                    .Select(_ => new Person())
-                    .ToList(),
-            };
+                province.Add(new Person());
+            }
 
             var records = new List<CsvRecord>();
 
@@ -68,9 +60,8 @@ namespace Laguna.Example.ConsoleApp
                     {
                         person.Inventory.Remove(Constants.Money, 10);
                     }
-                        
 
-                    province.Persons.Add(new Person());
+                    province.Add(new Person());
                 }
 
                 var unskilledWork = province.Market.History.GetValueOrDefault(Constants.UnskilledWork);
